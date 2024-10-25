@@ -23,10 +23,12 @@ public class ControlPanelStarter {
    *
    * @param args Command line arguments, only the first one of them used: when it is "fake",
    *             emulate fake events, when it is either something else or not present,
-   *             use real socket communication.
+   *             use real socket communication. Go to Run → Edit Configurations.
+   *             Add "fake" to the Program Arguments field.
+   *             Apply the changes.
    */
   public static void main(String[] args) {
-    boolean fake = false;
+    boolean fake = false;// make it true to test in fake mode
     if (args.length == 1 && "fake".equals(args[0])) {
       fake = true;
       Logger.info("Using FAKE events");
