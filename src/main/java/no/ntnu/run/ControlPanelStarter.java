@@ -1,9 +1,15 @@
 package no.ntnu.run;
 
+import java.util.List;
+
 import no.ntnu.controlpanel.CommunicationChannel;
+import no.ntnu.controlpanel.ControlPanelCommunicationChannel;
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.FakeCommunicationChannel;
+import no.ntnu.controlpanel.SensorActuatorNodeInfo;
+import no.ntnu.greenhouse.SensorReading;
 import no.ntnu.gui.controlpanel.ControlPanelApplication;
+import no.ntnu.listeners.controlpanel.GreenhouseEventListener;
 import no.ntnu.tools.Logger;
 
 /**
@@ -60,7 +66,9 @@ public class ControlPanelStarter {
     // TODO - here you initiate TCP/UDP socket communication
     // You communication class(es) may want to get reference to the logic and call necessary
     // logic methods when events happen (for example, when sensor data is received)
-    return null;
+
+    CommunicationChannel communicationChannel = new ControlPanelCommunicationChannel(logic);
+    return communicationChannel;
   }
 
   private CommunicationChannel initiateFakeSpawner(ControlPanelLogic logic) {
