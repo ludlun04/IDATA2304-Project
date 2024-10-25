@@ -67,6 +67,8 @@ public class GreenhouseSimulator {
 
   private void initiateRealCommunication() {
     // TODO - here you can set up the TCP or UDP communication
+
+    
   }
 
   private void initiateFakePeriodicSwitches() {
