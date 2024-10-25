@@ -1,5 +1,9 @@
 package no.ntnu.greenhouse;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,10 +69,58 @@ public class GreenhouseSimulator {
     }
   }
 
+  private void waitForClient(ServerSocket server) {
+    try {
+      Socket client = server.accept();
+      PrintWriter writer = new PrintWriter(client.getOutputStream());
+      
+      for (SensorActuatorNode node : this.nodes.values()) {
+        writer.println("add " + node.getId());
+  
+        // Sensors
+        node.addSensorListener((List<Sensor> sensors) -> {
+          writer.print(String.format(
+            "updateSensorsInformation %d ", node.getId()));
+          for(Sensor sensor : sensors) {
+            String type = sensor.getType();
+            SensorReading reading = sensor.getReading();
+            writer.print(String.format("%s %f %s" + type, 
+              reading.getValue(), 
+              reading.getValue())
+            );
+          }
+          writer.print("\n");
+          writer.flush();
+        });
+
+        // Actuators
+        node.addActuatorListener((int nodeID, Actuator actuator) -> {
+          writer.println(String.format(
+            "updateActuatorInformation %d %d %b", nodeID, 
+              actuator.getId(), 
+              actuator.isOn()
+          ));
+          writer.flush();
+        });
+      }
+    }
+
+    catch(IOException e) {
+      // heh
+    }
+  }
+
   private void initiateRealCommunication() {
     // TODO - here you can set up the TCP or UDP communication
 
-    
+    try {
+      ServerSocket server = new ServerSocket(8765);
+      new Thread(() -> waitForClient(server)).start();
+    }
+
+    catch(IOException e) {
+      // ehe
+    }
   }
 
   private void initiateFakePeriodicSwitches() {
