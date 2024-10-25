@@ -84,7 +84,7 @@ public class GreenhouseSimulator {
           for(Sensor sensor : sensors) {
             String type = sensor.getType();
             SensorReading reading = sensor.getReading();
-            writer.print(String.format("%s %f %s" + type, 
+            writer.print(String.format("%s %f %s", type, 
               reading.getValue(), 
               reading.getValue())
             );

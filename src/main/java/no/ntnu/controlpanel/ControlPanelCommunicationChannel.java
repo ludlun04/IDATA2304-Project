@@ -29,8 +29,10 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     @Override
     public boolean open() {
         boolean connected = false;
-
-        try (Socket socket = new Socket("127.0.0.1", 8765)) {
+        System.out.println("Connecting to socket");
+        try {
+            Socket socket = new Socket("127.0.0.1", 8765);
+            System.out.println("Socket connected");
             PrintWriter writer = new PrintWriter(socket.getOutputStream());
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -41,10 +43,11 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
             new Thread() {
                 @Override
                 public void run() {
-                    String message = "";
-
                     try {
-                        while ((message = reader.readLine()) != null) {
+                        String message = reader.readLine();
+                        System.out.println("This is the message");
+                        System.out.println(message);
+                        while (message != null) {
                             String[] args = message.split(" ");
 
                             String command = args[0];
@@ -74,8 +77,11 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
                                 comChannel.logic.onActuatorStateChanged(nodeId, actuatorId, state);
                             }
+
+                            message = reader.readLine();
                         }
                     } catch (Exception e) {
+                        System.out.println("Internal Error:");
                         System.out.println(e.getMessage());
                     }
                 }
@@ -83,6 +89,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
             connected = true;
         } catch (Exception e) {
+            System.out.println("External error:");
             System.out.println(e.getMessage());
         }
 
