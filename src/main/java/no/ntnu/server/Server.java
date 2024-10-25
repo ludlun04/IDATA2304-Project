@@ -19,14 +19,15 @@ public class Server {
   /**
    * Constructor of server
    *
-   * @param port port to listen for clients
+   * @param nodePort port to listen for sensor actuator nodes
+   * @param controlPanelPort port to listen for control panels
    */
-  public Server(int port) {
+  public Server(int nodePort, int controlPanelPort) {
     this.SensorActuatorNodes = new ArrayList<>();
     this.ControlPanels = new ArrayList<>();
     try {
-      this.nodeServerSocket = new ServerSocket(port);
-      this.controlPanelServerSocket = new ServerSocket(port);
+      this.nodeServerSocket = new ServerSocket(nodePort);
+      this.controlPanelServerSocket = new ServerSocket(controlPanelPort);
     } catch (IOException e) {
       System.out.println("Could not establish server socket");
       throw new RuntimeException(e);
@@ -53,8 +54,8 @@ public class Server {
 
         new Thread(() -> {
           System.out.println(
-              "SensorActuatorNodes = " + this.SensorActuatorNodes.size() + " ControlPanels = " +
-                  this.ControlPanels.size());
+              "SensorActuatorNodes = " + this.SensorActuatorNodes.size()
+                  + " ControlPanels = " + this.ControlPanels.size());
 
           newNodeHandler.sendMessage("Hello #" + this.SensorActuatorNodes.size());
           newControlPanelHandler.sendMessage("Hello #" + this.ControlPanels.size());
