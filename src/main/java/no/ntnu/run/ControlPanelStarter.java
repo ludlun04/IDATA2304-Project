@@ -1,15 +1,10 @@
 package no.ntnu.run;
 
-import java.util.List;
-
 import no.ntnu.controlpanel.CommunicationChannel;
 import no.ntnu.controlpanel.ControlPanelCommunicationChannel;
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.FakeCommunicationChannel;
-import no.ntnu.controlpanel.SensorActuatorNodeInfo;
-import no.ntnu.greenhouse.SensorReading;
 import no.ntnu.gui.controlpanel.ControlPanelApplication;
-import no.ntnu.listeners.controlpanel.GreenhouseEventListener;
 import no.ntnu.tools.Logger;
 
 /**

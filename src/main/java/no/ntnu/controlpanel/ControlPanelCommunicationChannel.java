@@ -52,12 +52,14 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
                             String command = args[0];
                             int nodeId = Integer.parseInt(args[1]);
-
-                            if (command == "add") {
+                            System.err.println(message);
+                            
+                            if (command.equals("add")) {
+                                System.out.println("Adding node");
                                 comChannel.logic.onNodeAdded(new SensorActuatorNodeInfo(nodeId));
-                            } else if (command == "remove") {
+                            } else if (command.equals("remove")) {
                                 comChannel.logic.onNodeRemoved(nodeId);
-                            } else if (command == "updateSensors") {
+                            } else if (command.equals("updateSensors")) {
                                 ArrayList<SensorReading> readings = new ArrayList<>();
                                 
                                 for (int i = 2; i < args.length; i += 3) {
@@ -71,7 +73,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
                                 }
 
                                 comChannel.logic.onSensorData(nodeId, readings);
-                            } else if (command == "updateActuator") {
+                            } else if (command.equals("updateActuator")) {
                                 int actuatorId = Integer.parseInt(args[2]);
                                 boolean state = Boolean.parseBoolean(args[3]);
 
