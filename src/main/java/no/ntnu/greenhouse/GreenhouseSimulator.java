@@ -88,9 +88,6 @@ public class GreenhouseSimulator {
         InputStream inputStream = null;
         try {
             inputStream = clientSocket.getInputStream();
-
-
-
         } catch (IOException ioException) {
             System.err.println("Failed to get input stream: " + ioException.getMessage());
         }
@@ -102,6 +99,7 @@ public class GreenhouseSimulator {
         } catch (IOException ioException) {
             System.err.println("Failed to read client message: " + ioException.getMessage());
         }
+        return null;
 
     }
 
@@ -132,14 +130,15 @@ public class GreenhouseSimulator {
     }
 
 
-    private PrintWriter getClientPrintWriter(ServerSocket serverSocket) {
+    private PrintWriter getClientPrintWriter(Socket clientSocket) {
+
+        PrintWriter printWriter = null;
         try {
-            Socket client = serverSocket.accept();
-            return new PrintWriter(client.getOutputStream());
+            printWriter = new PrintWriter(clientSocket.getOutputStream());
         } catch (IOException e) {
             System.err.println("Failed to get client print writer");
         }
-        return null;
+        return printWriter;
     }
 
     private static void sendNodeInformation(SensorActuatorNode node, PrintWriter writer) {
@@ -160,7 +159,7 @@ public class GreenhouseSimulator {
         try {
             ServerSocket server = new ServerSocket(8765);
 
-            new Thread(() -> waitForClient(server)).start();
+            new Thread(() -> handleClient(server)).start();
         }
 
         catch (IOException e) {
@@ -168,9 +167,22 @@ public class GreenhouseSimulator {
         }
     }
 
-    private void waitForClient(ServerSocket server) {
-        PrintWriter clientWriter = getClientPrintWriter(server);
+    private void handleClient(ServerSocket server) {
+        Socket clientSocket = null;
+        try {
+            clientSocket = server.accept();
+        } catch (IOException e) {
+            System.err.println("Failed to accept client connection" + e.getMessage());;
+            throw new RuntimeException();
+        }
+
+        PrintWriter clientWriter = getClientPrintWriter(clientSocket);
         initializeClient(clientWriter);
+
+        while (clientSocket.isConnected()) {
+            String message = listenForClientMessage(clientSocket);
+            System.out.println("Client message:" + message);
+        }
 
     }
 
