@@ -1,7 +1,6 @@
 package no.ntnu.greenhouse;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -70,57 +69,89 @@ public class GreenhouseSimulator {
         }
     }
 
-    private void waitForClient(ServerSocket server) {
+    private void initializeClient(PrintWriter writer) {
         try {
-            Socket client = server.accept();
-            PrintWriter writer = new PrintWriter(client.getOutputStream());
-
-            try {
-                Thread.sleep(10000);
-            } catch (Exception e) {
-                // TODO: handle exception
-            }
-
-            for (SensorActuatorNode node : this.nodes.values()) {
-                writer.print("add " + node.getId());
-
-                for (Actuator actuator : node.getActuators()) {
-                    writer.print(String.format(" %d %s", actuator.getId(), actuator.getType()));
-                }
-
-                writer.println("");
-
-                writer.flush();
-
-                // Sensors
-                node.addSensorListener((List<Sensor> sensors) -> {
-                    writer.print(String.format(
-                            "updateSensorsInformation %d", node.getId()));
-                    for (Sensor sensor : sensors) {
-                        String type = sensor.getType();
-                        SensorReading reading = sensor.getReading();
-                        writer.print(String.format(" %s %f %s", type,
-                                reading.getValue(),
-                                reading.getUnit()));
-                    }
-                    writer.print("\n");
-                    writer.flush();
-                });
-
-                // Actuators
-                node.addActuatorListener((int nodeID, Actuator actuator) -> {
-                    writer.println(String.format(
-                            "updateActuatorInformation %d %d %b", nodeID,
-                            actuator.getId(),
-                            actuator.isOn()));
-                    writer.flush();
-                });
-            }
+            Thread.sleep(10000);
+        } catch (Exception e) {
+            // TODO: handle exception
+            System.err.println("Failed to sleep: " + e.getMessage());
         }
 
-        catch (IOException e) {
-            // heh
+        for (SensorActuatorNode node : this.nodes.values()) {
+            sendNodeInformation(node, writer);
+            initializeSensorListeners(writer, node);
+            initializeActuatorListeners(writer, node);
         }
+    }
+
+    private String listenForClientMessage(Socket clientSocket) {
+        InputStream inputStream = null;
+        try {
+            inputStream = clientSocket.getInputStream();
+
+
+
+        } catch (IOException ioException) {
+            System.err.println("Failed to get input stream: " + ioException.getMessage());
+        }
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader reader = new BufferedReader(inputStreamReader);
+
+        try {
+            return reader.readLine();
+        } catch (IOException ioException) {
+            System.err.println("Failed to read client message: " + ioException.getMessage());
+        }
+
+    }
+
+    private static void initializeActuatorListeners(PrintWriter writer, SensorActuatorNode node) {
+        node.addActuatorListener((int nodeID, Actuator actuator) -> {
+            writer.println(String.format(
+                    "updateActuatorInformation %d %d %b", nodeID,
+                    actuator.getId(),
+                    actuator.isOn()));
+            writer.flush();
+        });
+    }
+
+    private void initializeSensorListeners(PrintWriter writer, SensorActuatorNode node) {
+        node.addSensorListener((List<Sensor> sensors) -> {
+            writer.print(String.format(
+                    "updateSensorsInformation %d", node.getId()));
+            for (Sensor sensor : sensors) {
+                String type = sensor.getType();
+                SensorReading reading = sensor.getReading();
+                writer.print(String.format(" %s %f %s", type,
+                        reading.getValue(),
+                        reading.getUnit()));
+            }
+            writer.print("\n");
+            writer.flush();
+        });
+    }
+
+
+    private PrintWriter getClientPrintWriter(ServerSocket serverSocket) {
+        try {
+            Socket client = serverSocket.accept();
+            return new PrintWriter(client.getOutputStream());
+        } catch (IOException e) {
+            System.err.println("Failed to get client print writer");
+        }
+        return null;
+    }
+
+    private static void sendNodeInformation(SensorActuatorNode node, PrintWriter writer) {
+        writer.print("add " + node.getId());
+
+        for (Actuator actuator : node.getActuators()) {
+            writer.print(String.format(" %d %s", actuator.getId(), actuator.getType()));
+        }
+
+        writer.println("");
+
+        writer.flush();
     }
 
     private void initiateRealCommunication() {
@@ -128,12 +159,19 @@ public class GreenhouseSimulator {
 
         try {
             ServerSocket server = new ServerSocket(8765);
+
             new Thread(() -> waitForClient(server)).start();
         }
 
         catch (IOException e) {
             // ehe
         }
+    }
+
+    private void waitForClient(ServerSocket server) {
+        PrintWriter clientWriter = getClientPrintWriter(server);
+        initializeClient(clientWriter);
+
     }
 
     private void initiateFakePeriodicSwitches() {
