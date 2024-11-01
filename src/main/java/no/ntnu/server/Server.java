@@ -40,7 +40,8 @@ public class Server {
    * Waits for clients and listens to commands.
    */
   public void run() {
-    while (true) {
+    boolean finished = false;
+    while (!finished) {
       System.out.println("Looking for new client...");
 
       try {
@@ -72,6 +73,7 @@ public class Server {
       } catch (IOException e) {
         System.err.println(e.getMessage());
       }
+      finished = true;
     }
   }
 

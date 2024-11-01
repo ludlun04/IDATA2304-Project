@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
@@ -45,7 +46,7 @@ public class ActuatorPane extends TitledPane {
   }
 
   private Node createActuatorGui(Actuator actuator) {
-    HBox actuatorGui = new HBox(createActuatorLabel(actuator), createActuatorCheckbox(actuator));
+    HBox actuatorGui = new HBox(createActuatorLabel(actuator), createActuatorButton(actuator));
     actuatorGui.setSpacing(5);
     return actuatorGui;
   }
@@ -63,6 +64,20 @@ public class ActuatorPane extends TitledPane {
       }
     });
     return checkbox;
+  }
+
+  private Button createActuatorButton(Actuator actuator) {
+    Button button = new Button();
+    SimpleBooleanProperty isSelected = new SimpleBooleanProperty(actuator.isOn());
+    actuatorActive.put(actuator, isSelected);
+    button.setOnAction(event -> {
+      if (isSelected.get()) {
+        actuator.turnOff();
+      } else {
+        actuator.turnOn();
+      }
+    });
+    return button;
   }
 
   private Label createActuatorLabel(Actuator actuator) {

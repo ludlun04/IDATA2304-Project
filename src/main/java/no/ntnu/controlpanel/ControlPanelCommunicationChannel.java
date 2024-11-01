@@ -55,6 +55,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
                             if (command.equals("add")) {
                                 System.out.println("Adding node");
                                 comChannel.logic.onNodeAdded(new SensorActuatorNodeInfo(nodeId));
+
                             } else if (command.equals("remove")) {
                                 comChannel.logic.onNodeRemoved(nodeId);
                             } else if (command.equals("updateSensorsInformation")) {
