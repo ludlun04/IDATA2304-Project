@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.SensorReading;
 
 public class ControlPanelCommunicationChannel implements CommunicationChannel {
@@ -51,29 +52,38 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
                             String command = args[0];
                             int nodeId = Integer.parseInt(args[1]);
-                            
+
                             if (command.equals("add")) {
-                                System.out.println("Adding node");
-                                comChannel.logic.onNodeAdded(new SensorActuatorNodeInfo(nodeId));
+
+                                SensorActuatorNodeInfo sensorActuatorNodeInfo = new SensorActuatorNodeInfo(nodeId);
+
+                                for (int i = 2; i < args.length; i += 2) {
+                                    int actuatorId = Integer.parseInt(args[i]);
+                                    String actuatorType = args[i + 1];
+
+                                    Actuator actuator = new Actuator(actuatorId, actuatorType, nodeId);
+
+                                    sensorActuatorNodeInfo.addActuator(actuator);
+                                }
+
+                                comChannel.logic.onNodeAdded(sensorActuatorNodeInfo);
 
                             } else if (command.equals("remove")) {
                                 comChannel.logic.onNodeRemoved(nodeId);
                             } else if (command.equals("updateSensorsInformation")) {
                                 ArrayList<SensorReading> readings = new ArrayList<>();
-                                
+
                                 System.out.println("Parsing sensors");
 
                                 for (int i = 2; i < args.length; i += 3) {
                                     String sensorType = args[i];
-                                    Double value = Double.parseDouble(args[i + 1]); 
+                                    Double value = Double.parseDouble(args[i + 1]);
                                     String unit = args[i + 2];
 
                                     SensorReading sensorReading = new SensorReading(sensorType, value, unit);
 
                                     readings.add(sensorReading);
                                 }
-
-                                System.out.println(readings.toString());
 
                                 comChannel.logic.onSensorData(nodeId, readings);
 
