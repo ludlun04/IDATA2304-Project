@@ -45,23 +45,23 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
                 public void run() {
                     try {
                         String message = reader.readLine();
-                        System.out.println("This is the message");
-                        System.out.println(message);
+
                         while (message != null) {
                             String[] args = message.split(" ");
 
                             String command = args[0];
                             int nodeId = Integer.parseInt(args[1]);
-                            System.err.println(message);
                             
                             if (command.equals("add")) {
                                 System.out.println("Adding node");
                                 comChannel.logic.onNodeAdded(new SensorActuatorNodeInfo(nodeId));
                             } else if (command.equals("remove")) {
                                 comChannel.logic.onNodeRemoved(nodeId);
-                            } else if (command.equals("updateSensors")) {
+                            } else if (command.equals("updateSensorsInformation")) {
                                 ArrayList<SensorReading> readings = new ArrayList<>();
                                 
+                                System.out.println("Parsing sensors");
+
                                 for (int i = 2; i < args.length; i += 3) {
                                     String sensorType = args[i];
                                     Double value = Double.parseDouble(args[i + 1]); 
@@ -72,8 +72,11 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
                                     readings.add(sensorReading);
                                 }
 
+                                System.out.println(readings.toString());
+
                                 comChannel.logic.onSensorData(nodeId, readings);
-                            } else if (command.equals("updateActuator")) {
+
+                            } else if (command.equals("updateActuatorInformation")) {
                                 int actuatorId = Integer.parseInt(args[2]);
                                 boolean state = Boolean.parseBoolean(args[3]);
 
