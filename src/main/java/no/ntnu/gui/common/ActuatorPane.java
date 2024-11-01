@@ -70,7 +70,7 @@ public class ActuatorPane extends TitledPane {
     Button button = new Button();
     SimpleBooleanProperty isSelected = new SimpleBooleanProperty(actuator.isOn());
     actuatorActive.put(actuator, isSelected);
-    button.setText(isSelected.get() ? "Turn off" : "Turn on");
+    button.setText("Change state");
     button.setOnAction(event -> {
       if (isSelected.get()) {
         actuator.turnOff();
