@@ -1,17 +1,22 @@
 package no.ntnu.server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import no.ntnu.tools.Logger;
 
 /**
  * Class representing a server accepting incoming connection requests
  */
 public class Server {
+  private static Server instance;
   private ServerSocket serverSocket;
-  private List<ControlPanelClientHandler> ControlPanels;
+  private List<ControlPanelClientHandler> controlPanels;
+  private List<NodeClientHandler> nodes;
 
 
   /**
@@ -20,7 +25,8 @@ public class Server {
    * @param port port to listen for clients
    */
   public Server(int port) {
-    this.ControlPanels = new ArrayList<>();
+    this.nodes = new ArrayList<>();
+    this.controlPanels = new ArrayList<>();
     try {
       this.serverSocket = new ServerSocket(port);
     } catch (IOException e) {
@@ -28,39 +34,67 @@ public class Server {
       throw new RuntimeException(e);
     }
   }
-
   /**
    * Runs the server
    * <p>
    * Waits for clients and listens to commands.
    * </p>
    */
+  @SuppressWarnings("all")
   public void run() {
-    boolean finished = false;
-    while (!finished) {
+    while (true) {
       System.out.println("Looking for new client...");
 
       try {
         Socket newSocket = this.serverSocket.accept();
-        ControlPanelClientHandler newControlPanelHandler =
-            new ControlPanelClientHandler(newSocket);
-        this.ControlPanels.add(newControlPanelHandler);
+        System.out.println("New client connected: " + newSocket.getRemoteSocketAddress());
+        BufferedReader inputReader =
+            new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
+        String input = inputReader.readLine();
+        if (input.equals("Control panel")) {
+          ControlPanelClientHandler newControlPanelHandler =
+              new ControlPanelClientHandler(newSocket, this);
+          this.controlPanels.add(newControlPanelHandler);
+          new Thread(() -> {
+            System.out.println(
+                "Control panels = " + this.controlPanels.size() + ". Nodes = " + this.nodes.size() +
+                    ".");
 
-        new Thread(() -> {
-          System.out.println("Clients = " + this.ControlPanels.size());
+            newControlPanelHandler.sendMessage("Hello #" + this.controlPanels.size());
 
-          newControlPanelHandler.sendMessage("Hello #" + this.ControlPanels.size());
+            // Handle client for socket lifetime
+            while (newSocket.isConnected()) {
+              newControlPanelHandler.handleClient();
+            }
+          }).start();
+        } else if (input.equals("Node")) {
+          NodeClientHandler newNodeHandler = new NodeClientHandler(newSocket);
+          this.nodes.add(newNodeHandler);
+          new Thread(() -> {
+            System.out.println(
+                "Control panels = " + this.controlPanels.size() + ". Nodes = " + this.nodes.size() +
+                    ".");
 
-          // Handle client for socket lifetime
-          while (newSocket.isConnected()) {
-            newControlPanelHandler.handleClient();
-          }
-        }).start();
+            newNodeHandler.sendMessage("Hello #" + this.nodes.size());
+
+            // Handle client for socket lifetime
+            while (newSocket.isConnected()) {
+              newNodeHandler.handleClient();
+            }
+          }).start();
+        } else {
+          Logger.error("Unknown client type");
+          continue;
+        }
       } catch (IOException e) {
         System.err.println(e.getMessage());
       }
-      finished = true;
     }
   }
 
+  public void sendMessagesToNodes(String message) {
+    for (NodeClientHandler node : this.nodes) {
+      node.sendMessage(message);
+    }
+  }
 }

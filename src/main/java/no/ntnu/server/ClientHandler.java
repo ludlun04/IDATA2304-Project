@@ -40,6 +40,15 @@ public abstract class ClientHandler {
   }
 
   /**
+   * Forward a message to another client
+   *
+   * @param message message to be forwarded
+   */
+  public void forwardMessage(String message) {
+
+  }
+
+  /**
    * Waits for a message from the client
    *
    * @return message that has been sent from the client or null if the was no
