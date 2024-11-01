@@ -73,8 +73,6 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
                             } else if (command.equals("updateSensorsInformation")) {
                                 ArrayList<SensorReading> readings = new ArrayList<>();
 
-                                System.out.println("Parsing sensors");
-
                                 for (int i = 2; i < args.length; i += 3) {
                                     String sensorType = args[i];
                                     Double value = Double.parseDouble(args[i + 1]);
