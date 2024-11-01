@@ -93,7 +93,7 @@ public class GreenhouseSimulator {
                         SensorReading reading = sensor.getReading();
                         writer.print(String.format(" %s %f %s", type,
                                 reading.getValue(),
-                                reading.getValue()));
+                                reading.getUnit()));
                     }
                     writer.print("\n");
                     writer.flush();
