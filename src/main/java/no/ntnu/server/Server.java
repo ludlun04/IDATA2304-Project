@@ -10,24 +10,19 @@ import java.util.List;
  * Class representing a server accepting incoming connection requests
  */
 public class Server {
-  private ServerSocket nodeServerSocket;
-  private ServerSocket controlPanelServerSocket;
-  private List<NodeClientHandler> SensorActuatorNodes;
+  private ServerSocket serverSocket;
   private List<ControlPanelClientHandler> ControlPanels;
 
 
   /**
    * Constructor of server
    *
-   * @param nodePort port to listen for sensor actuator nodes
-   * @param controlPanelPort port to listen for control panels
+   * @param port port to listen for clients
    */
-  public Server(int nodePort, int controlPanelPort) {
-    this.SensorActuatorNodes = new ArrayList<>();
+  public Server(int port) {
     this.ControlPanels = new ArrayList<>();
     try {
-      this.nodeServerSocket = new ServerSocket(nodePort);
-      this.controlPanelServerSocket = new ServerSocket(controlPanelPort);
+      this.serverSocket = new ServerSocket(port);
     } catch (IOException e) {
       System.out.println("Could not establish server socket");
       throw new RuntimeException(e);
@@ -38,6 +33,7 @@ public class Server {
    * Runs the server
    * <p>
    * Waits for clients and listens to commands.
+   * </p>
    */
   public void run() {
     boolean finished = false;
@@ -45,28 +41,18 @@ public class Server {
       System.out.println("Looking for new client...");
 
       try {
-        Socket newNodeSocket = this.nodeServerSocket.accept();
-        Socket newControlPanelSocket = this.controlPanelServerSocket.accept();
-        NodeClientHandler newNodeHandler = new NodeClientHandler(newNodeSocket);
+        Socket newSocket = this.serverSocket.accept();
         ControlPanelClientHandler newControlPanelHandler =
-            new ControlPanelClientHandler(newControlPanelSocket);
-        this.SensorActuatorNodes.add(newNodeHandler);
+            new ControlPanelClientHandler(newSocket);
         this.ControlPanels.add(newControlPanelHandler);
 
         new Thread(() -> {
-          System.out.println(
-              "SensorActuatorNodes = " + this.SensorActuatorNodes.size()
-                  + " ControlPanels = " + this.ControlPanels.size());
+          System.out.println("Clients = " + this.ControlPanels.size());
 
-          newNodeHandler.sendMessage("Hello #" + this.SensorActuatorNodes.size());
           newControlPanelHandler.sendMessage("Hello #" + this.ControlPanels.size());
 
           // Handle client for socket lifetime
-          while (newNodeSocket.isConnected()) {
-            newNodeHandler.handleClient();
-          }
-          // Handle client for socket lifetime
-          while (newControlPanelSocket.isConnected()) {
+          while (newSocket.isConnected()) {
             newControlPanelHandler.handleClient();
           }
         }).start();
