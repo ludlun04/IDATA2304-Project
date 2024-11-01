@@ -82,7 +82,15 @@ public class GreenhouseSimulator {
             }
 
             for (SensorActuatorNode node : this.nodes.values()) {
-                writer.println("add " + node.getId());
+                writer.print("add " + node.getId());
+
+                for (Actuator actuator : node.getActuators()) {
+                    writer.print(String.format(" %d %s", actuator.getId(), actuator.getType()));
+                }
+
+                writer.println("");
+
+                writer.flush();
 
                 // Sensors
                 node.addSensorListener((List<Sensor> sensors) -> {
