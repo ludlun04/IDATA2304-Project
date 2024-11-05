@@ -62,7 +62,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
                                     String actuatorType = args[i + 1];
 
                                     Actuator actuator = new Actuator(actuatorId, actuatorType, nodeId);
-
+                                    actuator.setListener(logic);
                                     sensorActuatorNodeInfo.addActuator(actuator);
                                 }
 

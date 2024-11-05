@@ -71,7 +71,7 @@ public class GreenhouseSimulator {
 
     private void initializeClient(PrintWriter writer) {
         try {
-            Thread.sleep(10000);
+            Thread.sleep(1000);
         } catch (Exception e) {
             // TODO: handle exception
             System.err.println("Failed to sleep: " + e.getMessage());
@@ -179,10 +179,12 @@ public class GreenhouseSimulator {
         PrintWriter clientWriter = getClientPrintWriter(clientSocket);
         initializeClient(clientWriter);
 
-        while (clientSocket.isConnected()) {
-            String message = listenForClientMessage(clientSocket);
+        String message = "";
+        while (clientSocket.isConnected() && message != null) {
+            message = listenForClientMessage(clientSocket);
             System.out.println("Client message:" + message);
         }
+        System.out.println("Clientcommunication ended");
 
     }
 
