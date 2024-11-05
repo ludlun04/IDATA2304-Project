@@ -172,7 +172,7 @@ public class GreenhouseSimulator {
         try {
             clientSocket = server.accept();
         } catch (IOException e) {
-            System.err.println("Failed to accept client connection" + e.getMessage());;
+            Logger.error("Failed to accept client connection" + e.getMessage());
             throw new RuntimeException();
         }
 
@@ -182,10 +182,24 @@ public class GreenhouseSimulator {
         String message = "";
         while (clientSocket.isConnected() && message != null) {
             message = listenForClientMessage(clientSocket);
-            System.out.println("Client message:" + message);
-        }
-        System.out.println("Clientcommunication ended");
+            Logger.info("Client message:" + message);
+            String args[] = message.split(" ");
 
+            switch (args[0]) {
+                case "get":
+                    clientWriter.println("get " + nodes.get(Integer.parseInt(args[1]))
+                        .getSensors().get(Integer.parseInt(args[2])).getReading().getValue());
+                    break;
+                case "set":
+                    nodes.get(Integer.parseInt(args[1])).getActuators()
+                        .get(Integer.parseInt(args[2])).set(Boolean.parseBoolean(args[3]));
+                    break;
+                default:
+                    Logger.error("Unknown command: " + args[0]);
+                    break;
+            }
+        }
+        Logger.info("Client communication ended");
     }
 
     private void initiateFakePeriodicSwitches() {
