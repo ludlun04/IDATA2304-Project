@@ -15,6 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.ActuatorCollection;
+import no.ntnu.tools.Logger;
 
 /**
  * A section of the GUI representing a list of actuators. Can be used both on the sensor/actuator
@@ -72,11 +73,8 @@ public class ActuatorPane extends TitledPane {
     actuatorActive.put(actuator, isSelected);
     button.setText("Change state");
     button.setOnAction(event -> {
-      if (isSelected.get()) {
-        actuator.turnOff();
-      } else {
-        actuator.turnOn();
-      }
+      actuator.toggle();
+      Logger.info("Actuator " + actuator + " toggled");
     });
     return button;
   }
