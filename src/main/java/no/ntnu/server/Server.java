@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import no.ntnu.tools.Logger;
 
 /**
  * Class representing a server accepting incoming connection requests
@@ -38,7 +39,7 @@ public class Server {
   public void run() {
     boolean finished = false;
     while (!finished) {
-      System.out.println("Looking for new client...");
+      Logger.info("Looking for new client...");
 
       try {
         Socket newSocket = this.serverSocket.accept();
@@ -47,7 +48,7 @@ public class Server {
         this.ControlPanels.add(newControlPanelHandler);
 
         new Thread(() -> {
-          System.out.println("Clients = " + this.ControlPanels.size());
+          Logger.info("Clients = " + this.ControlPanels.size());
 
           newControlPanelHandler.sendMessage("Hello #" + this.ControlPanels.size());
 
@@ -57,7 +58,7 @@ public class Server {
           }
         }).start();
       } catch (IOException e) {
-        System.err.println(e.getMessage());
+        Logger.error(e.getMessage());
       }
       finished = true;
     }
