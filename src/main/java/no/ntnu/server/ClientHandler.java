@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.Arrays;
 
 /**
- * Class for handeling client
+ * Class for handling client
  */
 public abstract class ClientHandler {
   protected BufferedReader inputReader;
@@ -31,7 +31,7 @@ public abstract class ClientHandler {
   }
 
   /**
-   * Sends a message through the assosiated socket
+   * Sends a message through the associated socket
    *
    * @param message to be sent
    */
@@ -56,7 +56,7 @@ public abstract class ClientHandler {
   }
 
   /**
-   * Abstract method for handeling client
+   * Abstract method for handling client
    */
   public abstract void handleClient();
 

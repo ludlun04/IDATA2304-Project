@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.SensorReading;
 
 public class ControlPanelCommunicationChannel implements CommunicationChannel {
@@ -29,8 +30,10 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     @Override
     public boolean open() {
         boolean connected = false;
-
-        try (Socket socket = new Socket("127.0.0.1", 8765)) {
+        System.out.println("Connecting to socket");
+        try {
+            Socket socket = new Socket("127.0.0.1", 8765);
+            System.out.println("Socket connected");
             PrintWriter writer = new PrintWriter(socket.getOutputStream());
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -41,25 +44,38 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
             new Thread() {
                 @Override
                 public void run() {
-                    String message = "";
-
                     try {
-                        while ((message = reader.readLine()) != null) {
+                        String message = reader.readLine();
+
+                        while (message != null) {
                             String[] args = message.split(" ");
 
                             String command = args[0];
                             int nodeId = Integer.parseInt(args[1]);
 
-                            if (command == "add") {
-                                comChannel.logic.onNodeAdded(new SensorActuatorNodeInfo(nodeId));
-                            } else if (command == "remove") {
+                            if (command.equals("add")) {
+
+                                SensorActuatorNodeInfo sensorActuatorNodeInfo = new SensorActuatorNodeInfo(nodeId);
+
+                                for (int i = 2; i < args.length; i += 2) {
+                                    int actuatorId = Integer.parseInt(args[i]);
+                                    String actuatorType = args[i + 1];
+
+                                    Actuator actuator = new Actuator(actuatorId, actuatorType, nodeId);
+                                    actuator.setListener(logic);
+                                    sensorActuatorNodeInfo.addActuator(actuator);
+                                }
+
+                                comChannel.logic.onNodeAdded(sensorActuatorNodeInfo);
+
+                            } else if (command.equals("remove")) {
                                 comChannel.logic.onNodeRemoved(nodeId);
-                            } else if (command == "updateSensors") {
+                            } else if (command.equals("updateSensorsInformation")) {
                                 ArrayList<SensorReading> readings = new ArrayList<>();
-                                
+
                                 for (int i = 2; i < args.length; i += 3) {
                                     String sensorType = args[i];
-                                    Double value = Double.parseDouble(args[i + 1]); 
+                                    Double value = Double.parseDouble(args[i + 1]);
                                     String unit = args[i + 2];
 
                                     SensorReading sensorReading = new SensorReading(sensorType, value, unit);
@@ -68,14 +84,18 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
                                 }
 
                                 comChannel.logic.onSensorData(nodeId, readings);
-                            } else if (command == "updateActuator") {
+
+                            } else if (command.equals("updateActuatorInformation")) {
                                 int actuatorId = Integer.parseInt(args[2]);
                                 boolean state = Boolean.parseBoolean(args[3]);
 
                                 comChannel.logic.onActuatorStateChanged(nodeId, actuatorId, state);
                             }
+
+                            message = reader.readLine();
                         }
                     } catch (Exception e) {
+                        System.out.println("Internal Error:");
                         System.out.println(e.getMessage());
                     }
                 }
@@ -83,6 +103,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
             connected = true;
         } catch (Exception e) {
+            System.out.println("External error:");
             System.out.println(e.getMessage());
         }
 
