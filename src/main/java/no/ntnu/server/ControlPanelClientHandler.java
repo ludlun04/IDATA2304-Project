@@ -2,6 +2,7 @@ package no.ntnu.server;
 
 import java.net.Socket;
 import no.ntnu.controlpanel.ControlPanelLogic;
+import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.Sensor;
 import no.ntnu.greenhouse.SensorActuatorNode;
 import no.ntnu.tools.Logger;
@@ -32,6 +33,17 @@ public class ControlPanelClientHandler extends ClientHandler {
           case "set":
             setActuatorValue(args);
             break;
+          case "add":
+            switch (args[1]){
+              case "sensor":
+                Sensor sensor = new Sensor(args[2], Integer.parseInt(args[3]), Integer.parseInt(args[4]),Integer.parseInt(args[5]), args[6]);
+                this.server.getSimulator().getNode(Integer.parseInt(args[1])).addSensors(sensor, Integer.parseInt(args[7]));
+                break;
+              case "actuator":
+                Actuator actuator = new Actuator(args[2], Integer.parseInt(args[3]));
+                this.server.getSimulator().getNode(Integer.parseInt(args[1])).addActuator(actuator);
+                break;
+            }
           default:
             Logger.error("Unknown command: " + args[0]);
             break;
