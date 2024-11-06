@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.tools.Logger;
 
 /**
@@ -13,6 +14,7 @@ import no.ntnu.tools.Logger;
 public class Server {
   private ServerSocket serverSocket;
   private List<ControlPanelClientHandler> ControlPanels;
+  private GreenhouseSimulator simulator;
 
 
   /**
@@ -20,8 +22,9 @@ public class Server {
    *
    * @param port port to listen for clients
    */
-  public Server(int port) {
+  public Server(int port, GreenhouseSimulator simulator) {
     this.ControlPanels = new ArrayList<>();
+    this.simulator = simulator;
     try {
       this.serverSocket = new ServerSocket(port);
     } catch (IOException e) {
@@ -44,7 +47,7 @@ public class Server {
       try {
         Socket newSocket = this.serverSocket.accept();
         ControlPanelClientHandler newControlPanelHandler =
-            new ControlPanelClientHandler(newSocket);
+            new ControlPanelClientHandler(newSocket, this);
         this.ControlPanels.add(newControlPanelHandler);
 
         new Thread(() -> {
@@ -64,4 +67,7 @@ public class Server {
     }
   }
 
+  public GreenhouseSimulator getSimulator() {
+    return this.simulator;
+  }
 }

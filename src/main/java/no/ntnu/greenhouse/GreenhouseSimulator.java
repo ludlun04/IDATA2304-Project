@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import no.ntnu.listeners.greenhouse.NodeStateListener;
+import no.ntnu.server.Server;
 import no.ntnu.tools.Logger;
 
 /**
@@ -18,6 +19,7 @@ public class GreenhouseSimulator {
 
     private final List<PeriodicSwitch> periodicSwitches = new LinkedList<>();
     private final boolean fake;
+    private Server server;
 
     /**
      * Create a greenhouse simulator.
@@ -155,15 +157,14 @@ public class GreenhouseSimulator {
 
     private void initiateRealCommunication() {
         // TODO - here you can set up the TCP or UDP communication
-
+        int port = 8765;
         try {
-            ServerSocket server = new ServerSocket(8765);
+            this.server = new Server(port, this);
 
-            new Thread(() -> handleClient(server)).start();
-        }
-
-        catch (IOException e) {
-            // ehe
+            new Thread(() -> server.run()).start();
+        } catch (Exception e) {
+            Logger.error("Failed to start server: " + e.getMessage());
+            throw new RuntimeException();
         }
     }
 
@@ -236,5 +237,9 @@ public class GreenhouseSimulator {
         for (SensorActuatorNode node : nodes.values()) {
             node.addStateListener(listener);
         }
+    }
+
+    public SensorActuatorNode getNode(int id) {
+        return nodes.get(id);
     }
 }
