@@ -60,10 +60,10 @@ public class CommandParser {
 //     In these examples the control-panel "asks" the greenhouse to do something.
 //     The greenhouse code can then decide for itself whether to accept it or not.
 //
-//     request get_sensor_list <node_id>
-//     request get_sensor_data <node_id> <sensor_id>
-//     request get_actuator_state <node_id> <actuator_id>
-//     request set_actuator_state <node_id> <actuator_id> actuator_state
+//     request request_id get_sensor_list <node_id>
+//     request request_id get_sensor_data <node_id> <sensor_id>
+//     request request_id get_actuator_state <node_id> <actuator_id>
+//     request request_id set_actuator_state <node_id> <actuator_id> actuator_state
 
 // 
 //     (information understood in context of the request)
