@@ -76,7 +76,9 @@ public class GreenhouseSimulator extends Server {
     private void initiateRealCommunication() {
         // TODO - here you can set up the TCP or UDP communication
         try {
-            super.run();
+            new Thread(() -> {
+                super.run();
+            }).start();
         } catch (Exception e) {
             Logger.error("Failed to start server: " + e.getMessage());
             throw new RuntimeException();
