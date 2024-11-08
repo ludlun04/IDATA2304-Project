@@ -50,7 +50,7 @@ public class GreenhouseApplication extends Application implements NodeStateListe
    */
   public static void startApp(boolean fake) {
     Logger.info("Running greenhouse simulator with JavaFX GUI...");
-    simulator = new GreenhouseSimulator(fake, 8541);
+    simulator = new GreenhouseSimulator(fake, 8765);
     launch();
   }
 

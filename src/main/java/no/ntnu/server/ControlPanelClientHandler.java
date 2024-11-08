@@ -4,6 +4,8 @@ import java.net.Socket;
 import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.Sensor;
+import no.ntnu.greenhouse.SensorActuatorNode;
+import java.util.List;
 import no.ntnu.tools.Logger;
 
 public class ControlPanelClientHandler extends ClientHandler {
@@ -105,5 +107,45 @@ public class ControlPanelClientHandler extends ClientHandler {
         }
         super.sendMessage(request);
       }
+      for (SensorActuatorNode node : this.simulator.getNodes()) {
+        sendNodeInformation(node);
+        initializeSensorListeners(node);
+        initializeActuatorListeners(node);
+      }
     }
+
+    //TODO: Fix these methods to work.
+    // They should send the correct information to the client when asked for it.
+    // Find the problem...
+  private void sendNodeInformation(SensorActuatorNode node) {
+    String response = ("add " + node.getId());
+
+    for (Actuator actuator : node.getActuators()) {
+      response += (String.format(" %d %s", actuator.getId(), actuator.getType()));
+    }
+
+    super.sendMessage(response);
+  }
+
+  private void initializeActuatorListeners(SensorActuatorNode node) {
+    node.addActuatorListener((int nodeID, Actuator actuator) -> {
+      String response = String.format(
+          "updateActuatorInformation %d %d %b", nodeID,
+          actuator.getId(),
+          actuator.isOn());
+      sendMessage(response);
+    });
+  }
+
+  private void initializeSensorListeners(SensorActuatorNode node) {
+    node.addSensorListener((List<Sensor> sensors) -> {
+      String response = String.format("updateSensorsInformation %d", node.getId());
+        for (Sensor sensor : sensors) {
+            response += String.format(" %s %f %s", sensor.getType(),
+                sensor.getReading().getValue(), sensor.getReading().getUnit());
+        }
+        super.sendMessage(response);
+    });
+  }
+
 }

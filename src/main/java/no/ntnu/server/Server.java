@@ -51,8 +51,6 @@ public abstract class Server {
         new Thread(() -> {
           Logger.info("Clients = " + this.handlers.size());
 
-          newHandler.sendMessage("Hello #" + this.handlers.size());
-
           // Handle client for socket lifetime
           while (newSocket.isConnected()) {
             newHandler.handleClient();
