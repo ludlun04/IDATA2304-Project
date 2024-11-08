@@ -2,16 +2,17 @@ package no.ntnu.server;
 
 import java.net.Socket;
 import no.ntnu.controlpanel.ControlPanelLogic;
+import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.greenhouse.Sensor;
 import no.ntnu.greenhouse.SensorActuatorNode;
 import no.ntnu.tools.Logger;
 
 public class ControlPanelClientHandler extends ClientHandler {
-  private Server server;
+  private GreenhouseSimulator simulator;
 
-  public ControlPanelClientHandler(Socket socket, Server server) {
+  public ControlPanelClientHandler(Socket socket, GreenhouseSimulator simulator) {
     super(socket);
-    this.server = server;
+    this.simulator = simulator;
   }
 
   public void handleClient() {
@@ -47,7 +48,7 @@ public class ControlPanelClientHandler extends ClientHandler {
    * @param args The arguments for values.
    */
   private void setActuatorValue(String[] args) {
-    this.server.getSimulator().getNode(Integer.parseInt(args[1])).getActuators()
+    this.simulator.getNode(Integer.parseInt(args[1])).getActuators()
         .get(Integer.parseInt(args[2])).set(Boolean.parseBoolean(args[3]));
   }
 
@@ -56,8 +57,8 @@ public class ControlPanelClientHandler extends ClientHandler {
    * @param args The arguments for values.
    */
   private void getNodeValues(String[] args) {
-    for (Sensor sensor : this.server.getSimulator().getNode(Integer.parseInt(args[1])).getSensors()) {
-      this.sendMessage("" + sensor.getReading().getValue());
+    for (Sensor sensor : this.simulator.getNode(Integer.parseInt(args[1])).getSensors()) {
+      super.sendMessage("" + sensor.getReading().getValue());
     }
   }
 }

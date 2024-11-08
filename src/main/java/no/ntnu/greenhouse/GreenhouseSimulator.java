@@ -8,18 +8,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import no.ntnu.listeners.greenhouse.NodeStateListener;
+import no.ntnu.server.ClientHandler;
+import no.ntnu.server.ControlPanelClientHandler;
 import no.ntnu.server.Server;
 import no.ntnu.tools.Logger;
 
 /**
  * Application entrypoint - a simulator for a greenhouse.
  */
-public class GreenhouseSimulator {
+public class GreenhouseSimulator extends Server {
     private final Map<Integer, SensorActuatorNode> nodes = new HashMap<>();
 
     private final List<PeriodicSwitch> periodicSwitches = new LinkedList<>();
     private final boolean fake;
-    private Server server;
 
     /**
      * Create a greenhouse simulator.
@@ -27,7 +28,8 @@ public class GreenhouseSimulator {
      * @param fake When true, simulate a fake periodic events instead of creating
      *             socket communication
      */
-    public GreenhouseSimulator(boolean fake) {
+    public GreenhouseSimulator(boolean fake, int port) {
+        super(port);
         this.fake = fake;
     }
 
@@ -71,136 +73,14 @@ public class GreenhouseSimulator {
         }
     }
 
-    private void initializeClient(PrintWriter writer) {
-        try {
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            // TODO: handle exception
-            System.err.println("Failed to sleep: " + e.getMessage());
-        }
-
-        for (SensorActuatorNode node : this.nodes.values()) {
-            sendNodeInformation(node, writer);
-            initializeSensorListeners(writer, node);
-            initializeActuatorListeners(writer, node);
-        }
-    }
-
-    private String listenForClientMessage(Socket clientSocket) {
-        InputStream inputStream = null;
-        try {
-            inputStream = clientSocket.getInputStream();
-        } catch (IOException ioException) {
-            System.err.println("Failed to get input stream: " + ioException.getMessage());
-        }
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader reader = new BufferedReader(inputStreamReader);
-
-        try {
-            return reader.readLine();
-        } catch (IOException ioException) {
-            System.err.println("Failed to read client message: " + ioException.getMessage());
-        }
-        return null;
-
-    }
-
-    private static void initializeActuatorListeners(PrintWriter writer, SensorActuatorNode node) {
-        node.addActuatorListener((int nodeID, Actuator actuator) -> {
-            writer.println(String.format(
-                    "updateActuatorInformation %d %d %b", nodeID,
-                    actuator.getId(),
-                    actuator.isOn()));
-            writer.flush();
-        });
-    }
-
-    private void initializeSensorListeners(PrintWriter writer, SensorActuatorNode node) {
-        node.addSensorListener((List<Sensor> sensors) -> {
-            writer.print(String.format(
-                    "updateSensorsInformation %d", node.getId()));
-            for (Sensor sensor : sensors) {
-                String type = sensor.getType();
-                SensorReading reading = sensor.getReading();
-                writer.print(String.format(" %s %f %s", type,
-                        reading.getValue(),
-                        reading.getUnit()));
-            }
-            writer.print("\n");
-            writer.flush();
-        });
-    }
-
-
-    private PrintWriter getClientPrintWriter(Socket clientSocket) {
-
-        PrintWriter printWriter = null;
-        try {
-            printWriter = new PrintWriter(clientSocket.getOutputStream());
-        } catch (IOException e) {
-            System.err.println("Failed to get client print writer");
-        }
-        return printWriter;
-    }
-
-    private static void sendNodeInformation(SensorActuatorNode node, PrintWriter writer) {
-        writer.print("add " + node.getId());
-
-        for (Actuator actuator : node.getActuators()) {
-            writer.print(String.format(" %d %s", actuator.getId(), actuator.getType()));
-        }
-
-        writer.println("");
-
-        writer.flush();
-    }
-
     private void initiateRealCommunication() {
         // TODO - here you can set up the TCP or UDP communication
-        int port = 8765;
         try {
-            this.server = new Server(port, this);
-
-            new Thread(() -> server.run()).start();
+            super.run();
         } catch (Exception e) {
             Logger.error("Failed to start server: " + e.getMessage());
             throw new RuntimeException();
         }
-    }
-
-    private void handleClient(ServerSocket server) {
-        Socket clientSocket = null;
-        try {
-            clientSocket = server.accept();
-        } catch (IOException e) {
-            Logger.error("Failed to accept client connection" + e.getMessage());
-            throw new RuntimeException();
-        }
-
-        PrintWriter clientWriter = getClientPrintWriter(clientSocket);
-        initializeClient(clientWriter);
-
-        String message = "";
-        while (clientSocket.isConnected() && message != null) {
-            message = listenForClientMessage(clientSocket);
-            Logger.info("Client message:" + message);
-            String args[] = message.split(" ");
-
-            switch (args[0]) {
-                case "get":
-                    clientWriter.println("get " + nodes.get(Integer.parseInt(args[1]))
-                        .getSensors().get(Integer.parseInt(args[2])).getReading().getValue());
-                    break;
-                case "set":
-                    nodes.get(Integer.parseInt(args[1])).getActuators()
-                        .get(Integer.parseInt(args[2])).set(Boolean.parseBoolean(args[3]));
-                    break;
-                default:
-                    Logger.error("Unknown command: " + args[0]);
-                    break;
-            }
-        }
-        Logger.info("Client communication ended");
     }
 
     private void initiateFakePeriodicSwitches() {
@@ -241,5 +121,10 @@ public class GreenhouseSimulator {
 
     public SensorActuatorNode getNode(int id) {
         return nodes.get(id);
+    }
+
+    @Override
+    protected ClientHandler getClientHandler(Socket socket) {
+        return new ControlPanelClientHandler(socket, this);
     }
 }
