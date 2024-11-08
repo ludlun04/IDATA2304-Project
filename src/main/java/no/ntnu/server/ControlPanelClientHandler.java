@@ -36,12 +36,10 @@ public class ControlPanelClientHandler extends ClientHandler {
           case "add":
             switch (args[1]){
               case "sensor":
-                Sensor sensor = new Sensor(args[2], Integer.parseInt(args[3]), Integer.parseInt(args[4]),Integer.parseInt(args[5]), args[6]);
-                this.server.getSimulator().getNode(Integer.parseInt(args[1])).addSensors(sensor, Integer.parseInt(args[7]));
+                addSensorToNode(args);
                 break;
               case "actuator":
-                Actuator actuator = new Actuator(args[2], Integer.parseInt(args[3]));
-                this.server.getSimulator().getNode(Integer.parseInt(args[1])).addActuator(actuator);
+                addActuatorToNode(args);
                 break;
             }
           default:
@@ -52,6 +50,27 @@ public class ControlPanelClientHandler extends ClientHandler {
         Logger.error(e.getMessage());
       }
     }
+  }
+
+  /**
+   * Add an actuator to a node.
+   * @param args The arguments for values.
+   */
+  private void addActuatorToNode(String[] args) {
+    int nodeId = Integer.parseInt(args[2]);
+    Actuator actuator = new Actuator(args[3], nodeId);
+    this.server.getSimulator().getNode(nodeId).addActuator(actuator);
+  }
+
+  /**
+   * Add a sensor to a node.
+   * @param args The arguments for values.
+   */
+  private void addSensorToNode(String[] args) {
+    Sensor sensor = new Sensor(args[3], Integer.parseInt(args[4]),
+        Integer.parseInt(args[5]), Integer.parseInt(args[6]), args[7]);
+    this.server.getSimulator().getNode(Integer.parseInt(args[2]))
+        .addSensors(sensor, Integer.parseInt(args[8]));
   }
 
   /**

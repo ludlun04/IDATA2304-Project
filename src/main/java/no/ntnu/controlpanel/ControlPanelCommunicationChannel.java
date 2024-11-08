@@ -27,6 +27,33 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
         this.writer.flush();
     }
 
+    /**
+     *
+     * Sends a message to the server to add a sensor to a node
+     * @param nodeId id of node to have a sensor added
+     * @param sensorType type of sensor
+     * @param min min value the sensor can register
+     * @param max max value the sensor can register
+     * @param current current value the sensor reads
+     * @param unit unit the sensor reads in
+     * @param amount amount of sensors to add
+     */
+    public void addSensor(int nodeId, String sensorType, int min, int max, int current, String unit, int amount) {
+        this.writer.println(String.format("add sensor %d %s %d %d %d %s %d",
+            nodeId, sensorType, min, max, current, unit, amount));
+        this.writer.flush();
+    }
+
+    /**
+     * Sends a message to the server to add an actuator to a node
+     * @param nodeId id of node to have an actuator added
+     * @param actuatorType type of actuator
+     */
+    public void addActuator(int nodeId, String actuatorType) {
+        this.writer.println(String.format("add actuator %d %s", nodeId, actuatorType));
+        this.writer.flush();
+    }
+
     @Override
     public boolean open() {
         boolean connected = false;
