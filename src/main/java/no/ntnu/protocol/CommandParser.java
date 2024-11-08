@@ -20,16 +20,16 @@ public class CommandParser {
 
     //     }
         
-    public Command parse(String request) {
-        //Matcher matcher = pattern.matcher(inputString);
-
-        // if (matcher.matches()) {
-        //     String latitude = matcher.group("latitude");
-        //     String longitude = matcher.group("longitude");
-        //     String imei = matcher.group("imei");
-            // Use the extracted variables as needed
-        //}
-    }
+//    public Command parse(String request) {
+//        //Matcher matcher = pattern.matcher(inputString);
+//
+//        // if (matcher.matches()) {
+//        //     String latitude = matcher.group("latitude");
+//        //     String longitude = matcher.group("longitude");
+//        //     String imei = matcher.group("imei");
+//            // Use the extracted variables as needed
+//        //}
+//    }
 
 
 }

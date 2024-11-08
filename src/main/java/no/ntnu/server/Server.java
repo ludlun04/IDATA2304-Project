@@ -5,26 +5,24 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import no.ntnu.greenhouse.GreenhouseSimulator;
+
 import no.ntnu.tools.Logger;
 
 /**
  * Class representing a server accepting incoming connection requests
  */
-public class Server {
+public abstract class Server {
   private ServerSocket serverSocket;
-  private List<ControlPanelClientHandler> ControlPanels;
-  private GreenhouseSimulator simulator;
-
+  private List<ClientHandler> handlers;
 
   /**
    * Constructor of server
    *
    * @param port port to listen for clients
    */
-  public Server(int port, GreenhouseSimulator simulator) {
-    this.ControlPanels = new ArrayList<>();
-    this.simulator = simulator;
+  public Server(int port) {
+    this.handlers = new ArrayList<>();
+
     try {
       this.serverSocket = new ServerSocket(port);
     } catch (IOException e) {
@@ -46,18 +44,18 @@ public class Server {
 
       try {
         Socket newSocket = this.serverSocket.accept();
-        ControlPanelClientHandler newControlPanelHandler =
-            new ControlPanelClientHandler(newSocket, this);
-        this.ControlPanels.add(newControlPanelHandler);
+
+        ClientHandler newHandler = getClientHandler(newSocket);
+        this.handlers.add(newHandler);
 
         new Thread(() -> {
-          Logger.info("Clients = " + this.ControlPanels.size());
+          Logger.info("Clients = " + this.handlers.size());
 
-          newControlPanelHandler.sendMessage("Hello #" + this.ControlPanels.size());
+          newHandler.sendMessage("Hello #" + this.handlers.size());
 
           // Handle client for socket lifetime
           while (newSocket.isConnected()) {
-            newControlPanelHandler.handleClient();
+            newHandler.handleClient();
           }
         }).start();
       } catch (IOException e) {
@@ -67,7 +65,6 @@ public class Server {
     }
   }
 
-  public GreenhouseSimulator getSimulator() {
-    return this.simulator;
-  }
+  protected abstract ClientHandler getClientHandler(Socket socket);
+
 }
