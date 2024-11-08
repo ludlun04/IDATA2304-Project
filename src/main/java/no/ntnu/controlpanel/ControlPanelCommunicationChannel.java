@@ -65,6 +65,8 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             this.writer = writer;
+            writer.println("initialData");
+            writer.flush();
 
             ControlPanelCommunicationChannel comChannel = this;
 

@@ -125,6 +125,10 @@ public class GreenhouseSimulator extends Server {
         return nodes.get(id);
     }
 
+    public List<SensorActuatorNode> getNodes() {
+        return nodes.values().stream().toList();
+    }
+
     @Override
     protected ClientHandler getClientHandler(Socket socket) {
         return new ControlPanelClientHandler(socket, this);

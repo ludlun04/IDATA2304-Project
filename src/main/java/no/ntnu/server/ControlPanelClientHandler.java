@@ -26,6 +26,9 @@ public class ControlPanelClientHandler extends ClientHandler {
 
       try {
         switch (args[0]) {
+          case "initialData":
+            sendInitialData();
+            break;
           case "get":
             getNodeValues(args);
             break;
@@ -90,4 +93,17 @@ public class ControlPanelClientHandler extends ClientHandler {
       super.sendMessage("" + sensor.getReading().getValue());
     }
   }
+
+  /**
+   * Send initial data to client
+   */
+    public void sendInitialData() {
+      for (int i = 0; i < this.simulator.getNodes().size(); i++) {
+        String request = String.format("add %d ", i);
+        for (Actuator actuator : this.simulator.getNode(i).getActuators()) {
+          request += String.format("%d %s ", actuator.getId(), actuator.getType());
+        }
+        super.sendMessage(request);
+      }
+    }
 }
