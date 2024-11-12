@@ -16,13 +16,13 @@ public class ControlPanelClientHandler extends ClientHandler {
     this.simulator = simulator;
   }
 
+  @Override
   public void handleClient() {
     String message = this.getMessage();
     if (message != null) {
       System.out.println("ControlPanelClientHandler: " + message);
     }
     while (message != null) {
-      message = this.getMessage();
       Logger.info("Client message:" + message);
       String args[] = message.split(" ");
 
@@ -53,6 +53,8 @@ public class ControlPanelClientHandler extends ClientHandler {
       } catch (NumberFormatException e) {
         Logger.error(e.getMessage());
       }
+
+      message = this.getMessage();
     }
   }
 
@@ -100,13 +102,6 @@ public class ControlPanelClientHandler extends ClientHandler {
    * Send initial data to client
    */
     public void sendInitialData() {
-      for (int i = 0; i < this.simulator.getNodes().size(); i++) {
-        String request = String.format("add %d ", i);
-        for (Actuator actuator : this.simulator.getNode(i).getActuators()) {
-          request += String.format("%d %s ", actuator.getId(), actuator.getType());
-        }
-        super.sendMessage(request);
-      }
       for (SensorActuatorNode node : this.simulator.getNodes()) {
         sendNodeInformation(node);
         initializeSensorListeners(node);
@@ -118,10 +113,10 @@ public class ControlPanelClientHandler extends ClientHandler {
     // They should send the correct information to the client when asked for it.
     // Find the problem...
   private void sendNodeInformation(SensorActuatorNode node) {
-    String response = ("add " + node.getId());
+    String response = String.format("add %d", node.getId());
 
     for (Actuator actuator : node.getActuators()) {
-      response += (String.format(" %d %s", actuator.getId(), actuator.getType()));
+      response = String.format("%s %d %s", response, actuator.getId(), actuator.getType());
     }
 
     super.sendMessage(response);
@@ -133,7 +128,7 @@ public class ControlPanelClientHandler extends ClientHandler {
           "updateActuatorInformation %d %d %b", nodeID,
           actuator.getId(),
           actuator.isOn());
-      sendMessage(response);
+      super.sendMessage(response);
     });
   }
 
@@ -141,7 +136,7 @@ public class ControlPanelClientHandler extends ClientHandler {
     node.addSensorListener((List<Sensor> sensors) -> {
       String response = String.format("updateSensorsInformation %d", node.getId());
         for (Sensor sensor : sensors) {
-            response += String.format(" %s %f %s", sensor.getType(),
+            response = String.format("%s %s %f %s",response, sensor.getType(),
                 sensor.getReading().getValue(), sensor.getReading().getUnit());
         }
         super.sendMessage(response);

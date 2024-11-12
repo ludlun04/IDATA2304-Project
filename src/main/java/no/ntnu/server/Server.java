@@ -58,8 +58,8 @@ public abstract class Server {
         }).start();
       } catch (IOException e) {
         Logger.error(e.getMessage());
+        finished = true;
       }
-      finished = true;
     }
   }
 
