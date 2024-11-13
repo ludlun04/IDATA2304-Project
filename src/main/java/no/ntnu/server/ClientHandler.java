@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Arrays;
+import no.ntnu.tools.Logger;
 
 /**
  * Class for handling client
@@ -21,13 +21,9 @@ public abstract class ClientHandler {
    * @throws RuntimeException if constructor fails to open communication with
    *                          socket
    */
-  public ClientHandler(Socket clientSocket) {
-    try {
+  public ClientHandler(Socket clientSocket) throws IOException{
       this.inputReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
       this.outputWriter = new PrintWriter(clientSocket.getOutputStream(), true);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   /**
@@ -60,7 +56,12 @@ public abstract class ClientHandler {
    */
   public abstract void handleClient();
 
-  public boolean isActive() {
-    return this.isActive();
+  protected void close() {
+    try {
+      this.inputReader.close();
+      this.outputWriter.close();
+    } catch (IOException e) {
+      System.err.println(e.getMessage());
+    }
   }
 }

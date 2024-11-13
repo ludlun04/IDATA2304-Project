@@ -1,5 +1,6 @@
 package no.ntnu.server;
 
+import java.io.IOException;
 import java.net.Socket;
 import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.greenhouse.Actuator;
@@ -11,7 +12,8 @@ import no.ntnu.tools.Logger;
 public class ControlPanelClientHandler extends ClientHandler {
   private GreenhouseSimulator simulator;
 
-  public ControlPanelClientHandler(Socket socket, GreenhouseSimulator simulator) {
+  public ControlPanelClientHandler(Socket socket, GreenhouseSimulator simulator) throws
+      IOException {
     super(socket);
     this.simulator = simulator;
   }
@@ -46,6 +48,9 @@ public class ControlPanelClientHandler extends ClientHandler {
                 addActuatorToNode(args);
                 break;
             }
+          case "close":
+            closeConnection();
+            break;
           default:
             Logger.error("Unknown command: " + args[0]);
             break;
@@ -109,9 +114,10 @@ public class ControlPanelClientHandler extends ClientHandler {
       }
     }
 
-    //TODO: Fix these methods to work.
-    // They should send the correct information to the client when asked for it.
-    // Find the problem...
+  /**
+   * Send node information to client
+   * @param node The node to send information about
+   */
   private void sendNodeInformation(SensorActuatorNode node) {
     String response = String.format("add %d", node.getId());
 
@@ -122,6 +128,10 @@ public class ControlPanelClientHandler extends ClientHandler {
     super.sendMessage(response);
   }
 
+  /**
+   * Initialize actuator listeners
+   * @param node The node to initialize listeners for
+   */
   private void initializeActuatorListeners(SensorActuatorNode node) {
     node.addActuatorListener((int nodeID, Actuator actuator) -> {
       String response = String.format(
@@ -132,6 +142,10 @@ public class ControlPanelClientHandler extends ClientHandler {
     });
   }
 
+  /**
+   * Initialize sensor listeners
+   * @param node The node to initialize listeners for
+   */
   private void initializeSensorListeners(SensorActuatorNode node) {
     node.addSensorListener((List<Sensor> sensors) -> {
       String response = String.format("updateSensorsInformation %d", node.getId());
@@ -141,6 +155,10 @@ public class ControlPanelClientHandler extends ClientHandler {
         }
         super.sendMessage(response);
     });
+  }
+
+  private void closeConnection() {
+    super.close();
   }
 
 }

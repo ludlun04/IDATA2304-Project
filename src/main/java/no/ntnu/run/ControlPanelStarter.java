@@ -15,6 +15,7 @@ import no.ntnu.tools.Logger;
  */
 public class ControlPanelStarter {
   private final boolean fake;
+  private CommunicationChannel channel;
 
   public ControlPanelStarter(boolean fake) {
     this.fake = fake;
@@ -41,8 +42,8 @@ public class ControlPanelStarter {
 
   private void start() {
     ControlPanelLogic logic = new ControlPanelLogic();
-    CommunicationChannel channel = initiateCommunication(logic, fake);
-    ControlPanelApplication.startApp(logic, channel);
+    this.channel = initiateCommunication(logic, fake);
+    ControlPanelApplication.startApp(logic, this.channel);
     // This code is reached only after the GUI-window is closed
     Logger.info("Exiting the control panel application");
     stopCommunication();
@@ -99,5 +100,6 @@ public class ControlPanelStarter {
 
   private void stopCommunication() {
     // TODO - here you stop the TCP/UDP socket communication
+    channel.close();
   }
 }

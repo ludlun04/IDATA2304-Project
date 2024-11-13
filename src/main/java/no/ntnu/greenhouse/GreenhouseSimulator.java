@@ -131,6 +131,12 @@ public class GreenhouseSimulator extends Server {
 
     @Override
     protected ClientHandler getClientHandler(Socket socket) {
-        return new ControlPanelClientHandler(socket, this);
+      ControlPanelClientHandler result = null;
+      try {
+        result = new ControlPanelClientHandler(socket, this);
+      } catch (IOException e) {
+        Logger.error(e.getMessage());
+      }
+        return result;
     }
 }

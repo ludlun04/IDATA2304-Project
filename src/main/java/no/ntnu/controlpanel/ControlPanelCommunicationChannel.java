@@ -1,6 +1,7 @@
 package no.ntnu.controlpanel;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -13,19 +14,30 @@ import no.ntnu.tools.Logger;
 public class ControlPanelCommunicationChannel implements CommunicationChannel {
     private ControlPanelLogic logic;
     private PrintWriter writer;
+    private BufferedReader reader;
+    private Socket socket;
 
     public ControlPanelCommunicationChannel(ControlPanelLogic logic) {
         if (logic == null) {
             throw new IllegalArgumentException("logic cannot be null");
         }
-
         this.logic = logic;
+      try {
+        this.socket = new Socket("127.0.0.1", 8765);
+        this.writer = new PrintWriter(socket.getOutputStream(), true);
+        this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+      } catch (IOException e) {
+        Logger.error(e.getMessage());
+      }
+    }
+
+    public void sendInitialDataRequest() {
+        this.writer.println("initialData");
     }
 
     @Override
     public void sendActuatorChange(int nodeId, int actuatorId, boolean isOn) {
         this.writer.println(String.format("set %d %d %b", nodeId, actuatorId, isOn));
-        this.writer.flush();
     }
 
     /**
@@ -42,7 +54,6 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     public void addSensor(int nodeId, String sensorType, int min, int max, int current, String unit, int amount) {
         this.writer.println(String.format("add sensor %d %s %d %d %d %s %d",
             nodeId, sensorType, min, max, current, unit, amount));
-        this.writer.flush();
     }
 
     /**
@@ -52,96 +63,94 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
      */
     public void addActuator(int nodeId, String actuatorType) {
         this.writer.println(String.format("add actuator %d %s", nodeId, actuatorType));
-        this.writer.flush();
     }
 
     @Override
     public boolean open() {
         boolean connected = false;
-        System.out.println("Connecting to socket");
-        try {
-            Socket socket = new Socket("127.0.0.1", 8765);
-            System.out.println("Socket connected");
-            PrintWriter writer = new PrintWriter(socket.getOutputStream());
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        Logger.info("Connecting to socket");
+            sendInitialDataRequest();
 
-            this.writer = writer;
-            writer.println("initialData");
-            writer.flush();
-
-            ControlPanelCommunicationChannel comChannel = this;
-
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        String message = reader.readLine();
-
-                        while (message != null) {
-                            String[] args = message.split(" ");
-
-                            String command = args[0];
-                            int nodeId = Integer.parseInt(args[1]);
-
-                          switch (command) {
-                            case "add" -> {
-
-                              SensorActuatorNodeInfo sensorActuatorNodeInfo =
-                                  new SensorActuatorNodeInfo(nodeId);
-
-                              for (int i = 2; i < args.length; i += 2) {
-                                int actuatorId = Integer.parseInt(args[i]);
-                                String actuatorType = args[i + 1];
-
-                                Actuator actuator = new Actuator(actuatorId, actuatorType, nodeId);
-                                actuator.setListener(logic);
-                                sensorActuatorNodeInfo.addActuator(actuator);
-                              }
-
-                              comChannel.logic.onNodeAdded(sensorActuatorNodeInfo);
-                            }
-                            case "remove" -> comChannel.logic.onNodeRemoved(nodeId);
-                            case "updateSensorsInformation" -> {
-                              ArrayList<SensorReading> readings = new ArrayList<>();
-
-                              for (int i = 2; i < args.length; i += 3) {
-                                String sensorType = args[i];
-                                Double value = Double.parseDouble(args[i + 1]);
-                                String unit = args[i + 2];
-
-                                SensorReading sensorReading =
-                                    new SensorReading(sensorType, value, unit);
-
-                                readings.add(sensorReading);
-                              }
-
-                              comChannel.logic.onSensorData(nodeId, readings);
-                            }
-                            case "updateActuatorInformation" -> {
-                              int actuatorId = Integer.parseInt(args[2]);
-                              boolean state = Boolean.parseBoolean(args[3]);
-
-                              comChannel.logic.onActuatorStateChanged(nodeId, actuatorId, state);
-                            }
-                              default -> Logger.info("Unknown command: " + command);
-                          }
-
-                            message = reader.readLine();
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Internal Error:");
-                        System.out.println(e.getMessage());
-                    }
-                }
-            }.start();
+            new Thread(() -> {
+                handleCommunication();
+            }).start();
 
             connected = true;
-        } catch (Exception e) {
-            System.out.println("External error:");
-            System.out.println(e.getMessage());
-        }
 
         return connected;
+    }
+
+    public void handleCommunication(){
+      try {
+        String message = reader.readLine();
+
+        while (message != null) {
+          String[] args = message.split(" ");
+
+          String command = args[0];
+          int nodeId = Integer.parseInt(args[1]);
+
+          switch (command) {
+            case "add" -> {
+
+              SensorActuatorNodeInfo sensorActuatorNodeInfo =
+                  new SensorActuatorNodeInfo(nodeId);
+
+              for (int i = 2; i < args.length; i += 2) {
+                int actuatorId = Integer.parseInt(args[i]);
+                String actuatorType = args[i + 1];
+
+                Actuator actuator = new Actuator(actuatorId, actuatorType, nodeId);
+                actuator.setListener(this.logic);
+                sensorActuatorNodeInfo.addActuator(actuator);
+              }
+
+              this.logic.onNodeAdded(sensorActuatorNodeInfo);
+            }
+            case "remove" -> this.logic.onNodeRemoved(nodeId);
+            case "updateSensorsInformation" -> {
+              ArrayList<SensorReading> readings = new ArrayList<>();
+
+              for (int i = 2; i < args.length; i += 3) {
+                String sensorType = args[i];
+                Double value = Double.parseDouble(args[i + 1]);
+                String unit = args[i + 2];
+
+                SensorReading sensorReading =
+                    new SensorReading(sensorType, value, unit);
+
+                readings.add(sensorReading);
+              }
+
+              this.logic.onSensorData(nodeId, readings);
+            }
+            case "updateActuatorInformation" -> {
+              int actuatorId = Integer.parseInt(args[2]);
+              boolean state = Boolean.parseBoolean(args[3]);
+
+              this.logic.onActuatorStateChanged(nodeId, actuatorId, state);
+            }
+            default -> Logger.info("Unknown command: " + command);
+          }
+
+          message = reader.readLine();
+        }
+      } catch (Exception e) {
+        Logger.error("Internal Error:");
+        Logger.error(e.getMessage());
+      }
+    }
+
+    @Override
+    public void close() {
+        this.writer.println("close");
+        this.writer.close();
+        try {
+            this.reader.close();
+            this.socket.close();
+        } catch (IOException e) {
+            Logger.error(e.getMessage());
+        }
     }
 
 }
