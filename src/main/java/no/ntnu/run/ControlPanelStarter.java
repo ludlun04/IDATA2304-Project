@@ -1,5 +1,6 @@
 package no.ntnu.run;
 
+import java.io.IOException;
 import no.ntnu.controlpanel.CommunicationChannel;
 import no.ntnu.controlpanel.ControlPanelCommunicationChannel;
 import no.ntnu.controlpanel.ControlPanelLogic;
@@ -65,7 +66,13 @@ public class ControlPanelStarter {
     // You communication class(es) may want to get reference to the logic and call necessary
     // logic methods when events happen (for example, when sensor data is received)
 
-    CommunicationChannel communicationChannel = new ControlPanelCommunicationChannel(logic);
+
+    CommunicationChannel communicationChannel = null;
+    try {
+      communicationChannel = new ControlPanelCommunicationChannel(logic);
+    } catch (IOException e) {
+      Logger.error(e.getMessage());
+    }
     logic.setCommunicationChannel(communicationChannel);
     return communicationChannel;
   }

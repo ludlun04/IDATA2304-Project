@@ -10,34 +10,26 @@ import java.util.ArrayList;
 import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.SensorReading;
 import no.ntnu.tools.Logger;
+import no.ntnu.utils.CommunicationHandler;
 
-public class ControlPanelCommunicationChannel implements CommunicationChannel {
+public class ControlPanelCommunicationChannel extends CommunicationHandler implements CommunicationChannel {
     private ControlPanelLogic logic;
-    private PrintWriter writer;
-    private BufferedReader reader;
-    private Socket socket;
 
-    public ControlPanelCommunicationChannel(ControlPanelLogic logic) {
+    public ControlPanelCommunicationChannel(ControlPanelLogic logic) throws IOException{
+      super(new Socket("127.0.0.1", 8765));
         if (logic == null) {
             throw new IllegalArgumentException("logic cannot be null");
         }
         this.logic = logic;
-      try {
-        this.socket = new Socket("127.0.0.1", 8765);
-        this.writer = new PrintWriter(socket.getOutputStream(), true);
-        this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-      } catch (IOException e) {
-        Logger.error(e.getMessage());
-      }
     }
 
     public void sendInitialDataRequest() {
-        this.writer.println("initialData");
+        super.sendMessage("initialData");
     }
 
     @Override
     public void sendActuatorChange(int nodeId, int actuatorId, boolean isOn) {
-        this.writer.println(String.format("set %d %d %b", nodeId, actuatorId, isOn));
+        super.sendMessage(String.format("set %d %d %b", nodeId, actuatorId, isOn));
     }
 
     /**
@@ -52,7 +44,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
      * @param amount amount of sensors to add
      */
     public void addSensor(int nodeId, String sensorType, int min, int max, int current, String unit, int amount) {
-        this.writer.println(String.format("add sensor %d %s %d %d %d %s %d",
+        super.sendMessage(String.format("add sensor %d %s %d %d %d %s %d",
             nodeId, sensorType, min, max, current, unit, amount));
     }
 
@@ -62,7 +54,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
      * @param actuatorType type of actuator
      */
     public void addActuator(int nodeId, String actuatorType) {
-        this.writer.println(String.format("add actuator %d %s", nodeId, actuatorType));
+        super.sendMessage(String.format("add actuator %d %s", nodeId, actuatorType));
     }
 
     @Override
@@ -82,7 +74,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
     public void handleCommunication(){
       try {
-        String message = reader.readLine();
+        String message = super.getMessage();
 
         while (message != null) {
           String[] args = message.split(" ");
@@ -133,7 +125,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
             default -> Logger.info("Unknown command: " + command);
           }
 
-          message = reader.readLine();
+          message = super.getMessage();
         }
       } catch (Exception e) {
         Logger.error("Internal Error:");
@@ -143,14 +135,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
     @Override
     public void close() {
-        this.writer.println("close");
-        this.writer.close();
-        try {
-            this.reader.close();
-            this.socket.close();
-        } catch (IOException e) {
-            Logger.error(e.getMessage());
-        }
+        //TODO: Implement close
     }
 
 }

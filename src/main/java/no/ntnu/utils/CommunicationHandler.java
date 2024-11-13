@@ -1,16 +1,15 @@
-package no.ntnu.server;
+package no.ntnu.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import no.ntnu.tools.Logger;
 
 /**
  * Class for handling client
  */
-public abstract class ClientHandler {
+public abstract class CommunicationHandler {
   protected BufferedReader inputReader;
   private final PrintWriter outputWriter;
 
@@ -21,7 +20,7 @@ public abstract class ClientHandler {
    * @throws RuntimeException if constructor fails to open communication with
    *                          socket
    */
-  public ClientHandler(Socket clientSocket) throws IOException{
+  public CommunicationHandler(Socket clientSocket) throws IOException{
       this.inputReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
       this.outputWriter = new PrintWriter(clientSocket.getOutputStream(), true);
   }
@@ -52,9 +51,9 @@ public abstract class ClientHandler {
   }
 
   /**
-   * Abstract method for handling client
+   * Abstract method for handling communication
    */
-  public abstract void handleClient();
+  public abstract void handleCommunication();
 
   protected void close() {
     try {

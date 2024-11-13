@@ -8,8 +8,9 @@ import no.ntnu.greenhouse.Sensor;
 import no.ntnu.greenhouse.SensorActuatorNode;
 import java.util.List;
 import no.ntnu.tools.Logger;
+import no.ntnu.utils.CommunicationHandler;
 
-public class ControlPanelClientHandler extends ClientHandler {
+public class ControlPanelClientHandler extends CommunicationHandler {
   private GreenhouseSimulator simulator;
 
   public ControlPanelClientHandler(Socket socket, GreenhouseSimulator simulator) throws
@@ -19,8 +20,8 @@ public class ControlPanelClientHandler extends ClientHandler {
   }
 
   @Override
-  public void handleClient() {
-    String message = this.getMessage();
+  public void handleCommunication() {
+    String message = super.getMessage();
     if (message != null) {
       System.out.println("ControlPanelClientHandler: " + message);
     }
@@ -59,7 +60,7 @@ public class ControlPanelClientHandler extends ClientHandler {
         Logger.error(e.getMessage());
       }
 
-      message = this.getMessage();
+      message = super.getMessage();
     }
   }
 
