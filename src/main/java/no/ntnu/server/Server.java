@@ -14,7 +14,7 @@ import no.ntnu.utils.CommunicationHandler;
  */
 public abstract class Server {
   private ServerSocket serverSocket;
-  private List<CommunicationHandler> handlers;
+  private List<ControlPanelClientHandler> handlers;
 
   /**
    * Constructor of server
@@ -46,11 +46,12 @@ public abstract class Server {
       try {
         Socket newSocket = this.serverSocket.accept();
 
-        CommunicationHandler newHandler = getClientHandler(newSocket);
+        ControlPanelClientHandler newHandler = getClientHandler(newSocket);
         this.handlers.add(newHandler);
 
         new Thread(() -> {
           Logger.info("Clients = " + this.handlers.size());
+          newHandler.createCipherCommunication();
 
           // Handle client for socket lifetime
           while (newSocket.isConnected()) {
@@ -64,6 +65,6 @@ public abstract class Server {
     }
   }
 
-  protected abstract CommunicationHandler getClientHandler(Socket socket);
+  protected abstract ControlPanelClientHandler getClientHandler(Socket socket);
 
 }
