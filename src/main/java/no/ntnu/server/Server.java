@@ -54,7 +54,11 @@ public abstract class Server {
 
           // Handle client for socket lifetime
           while (newSocket.isConnected()) {
-            newHandler.handleCommunication();
+            try {
+              newHandler.handleCommunication();
+            } catch (IOException e) {
+              throw new RuntimeException(e);
+            }
           }
         }).start();
       } catch (IOException e) {

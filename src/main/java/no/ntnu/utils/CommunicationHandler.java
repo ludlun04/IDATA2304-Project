@@ -53,7 +53,7 @@ public abstract class CommunicationHandler {
   /**
    * Abstract method for handling communication
    */
-  public abstract void handleCommunication();
+  public abstract void handleCommunication() throws IOException;
 
   protected void close() {
     try {

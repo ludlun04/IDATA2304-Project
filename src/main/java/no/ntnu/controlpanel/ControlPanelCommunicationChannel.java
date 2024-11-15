@@ -12,130 +12,130 @@ import no.ntnu.greenhouse.SensorReading;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
 
-public class ControlPanelCommunicationChannel extends CommunicationHandler implements CommunicationChannel {
-    private ControlPanelLogic logic;
+public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
-    public ControlPanelCommunicationChannel(ControlPanelLogic logic) throws IOException{
-      super(new Socket("127.0.0.1", 8765));
-        if (logic == null) {
-            throw new IllegalArgumentException("logic cannot be null");
-        }
-        this.logic = logic;
+  private static final int RECONNECT_ATTEMPTS = 5;
+  private static final int RECONNECT_ATTEMPT_WAIT_MILLIS = 5000;
+
+
+  private boolean stayConnected;
+  private ControlPanelCommunicationHandler handler;
+  private ControlPanelLogic logic;
+
+  public ControlPanelCommunicationChannel(ControlPanelLogic logic) throws IOException {
+    if (logic == null) {
+      throw new IllegalArgumentException("logic cannot be null");
     }
+    this.logic = logic;
+  }
 
-    public void sendInitialDataRequest() {
-        super.sendMessage("initialData");
-    }
+  public void sendInitialDataRequest() {
+    this.handler.sendMessage("initialData");
+  }
 
-    @Override
-    public void sendActuatorChange(int nodeId, int actuatorId, boolean isOn) {
-        super.sendMessage(String.format("set %d %d %b", nodeId, actuatorId, isOn));
-    }
+  @Override
+  public void sendActuatorChange(int nodeId, int actuatorId, boolean isOn) {
+    this.handler.sendMessage(String.format("set %d %d %b", nodeId, actuatorId, isOn));
+  }
 
-    /**
-     *
-     * Sends a message to the server to add a sensor to a node
-     * @param nodeId id of node to have a sensor added
-     * @param sensorType type of sensor
-     * @param min min value the sensor can register
-     * @param max max value the sensor can register
-     * @param current current value the sensor reads
-     * @param unit unit the sensor reads in
-     * @param amount amount of sensors to add
-     */
-    public void addSensor(int nodeId, String sensorType, int min, int max, int current, String unit, int amount) {
-        super.sendMessage(String.format("add sensor %d %s %d %d %d %s %d",
-            nodeId, sensorType, min, max, current, unit, amount));
-    }
+  /**
+   * Sends a message to the server to add a sensor to a node
+   *
+   * @param nodeId     id of node to have a sensor added
+   * @param sensorType type of sensor
+   * @param min        min value the sensor can register
+   * @param max        max value the sensor can register
+   * @param current    current value the sensor reads
+   * @param unit       unit the sensor reads in
+   * @param amount     amount of sensors to add
+   */
+  public void addSensor(int nodeId, String sensorType, int min, int max, int current, String unit, int amount) {
+    this.handler.sendMessage(String.format("add sensor %d %s %d %d %d %s %d",
+        nodeId, sensorType, min, max, current, unit, amount));
+  }
 
-    /**
-     * Sends a message to the server to add an actuator to a node
-     * @param nodeId id of node to have an actuator added
-     * @param actuatorType type of actuator
-     */
-    public void addActuator(int nodeId, String actuatorType) {
-        super.sendMessage(String.format("add actuator %d %s", nodeId, actuatorType));
-    }
+  /**
+   * Sends a message to the server to add an actuator to a node
+   *
+   * @param nodeId       id of node to have an actuator added
+   * @param actuatorType type of actuator
+   */
+  public void addActuator(int nodeId, String actuatorType) {
+    this.handler.sendMessage(String.format("add actuator %d %s", nodeId, actuatorType));
+  }
 
-    @Override
-    public boolean open() {
-        boolean connected = false;
-        Logger.info("Connecting to socket");
-            sendInitialDataRequest();
+  @Override
+  public boolean open() {
+    boolean connected;
+    this.stayConnected = true;
+    Logger.info("Connecting to socket");
 
-            new Thread(() -> {
-                handleCommunication();
-            }).start();
+    try {
+      createHandler();
 
-            connected = true;
+      sendInitialDataRequest();
 
-        return connected;
-    }
+      new Thread(() -> {
 
-    public void handleCommunication(){
-      try {
-        String message = super.getMessage();
-
-        while (message != null) {
-          String[] args = message.split(" ");
-
-          String command = args[0];
-          int nodeId = Integer.parseInt(args[1]);
-
-          switch (command) {
-            case "add" -> {
-
-              SensorActuatorNodeInfo sensorActuatorNodeInfo =
-                  new SensorActuatorNodeInfo(nodeId);
-
-              for (int i = 2; i < args.length; i += 2) {
-                int actuatorId = Integer.parseInt(args[i]);
-                String actuatorType = args[i + 1];
-
-                Actuator actuator = new Actuator(actuatorId, actuatorType, nodeId);
-                actuator.setListener(this.logic);
-                sensorActuatorNodeInfo.addActuator(actuator);
-              }
-
-              this.logic.onNodeAdded(sensorActuatorNodeInfo);
+        while (this.stayConnected) {
+          try {
+            this.handler.handleCommunication();
+          } catch (IOException ioException) {
+            if (!attemptReconnect()) {
+              Logger.info("Could not connect, stopping communication channel.");
+              this.stayConnected = false;
+              this.logic.onCommunicationChannelClosed();
             }
-            case "remove" -> this.logic.onNodeRemoved(nodeId);
-            case "updateSensorsInformation" -> {
-              ArrayList<SensorReading> readings = new ArrayList<>();
-
-              for (int i = 2; i < args.length; i += 3) {
-                String sensorType = args[i];
-                Double value = Double.parseDouble(args[i + 1]);
-                String unit = args[i + 2];
-
-                SensorReading sensorReading =
-                    new SensorReading(sensorType, value, unit);
-
-                readings.add(sensorReading);
-              }
-
-              this.logic.onSensorData(nodeId, readings);
-            }
-            case "updateActuatorInformation" -> {
-              int actuatorId = Integer.parseInt(args[2]);
-              boolean state = Boolean.parseBoolean(args[3]);
-
-              this.logic.onActuatorStateChanged(nodeId, actuatorId, state);
-            }
-            default -> Logger.info("Unknown command: " + command);
           }
 
-          message = super.getMessage();
         }
-      } catch (Exception e) {
-        Logger.error("Internal Error:");
-        Logger.error(e.getMessage());
-      }
-    }
+      }).start();
 
-    @Override
-    public void close() {
-        //TODO: Implement close
+      connected = true;
+    } catch (IOException e) {
+      connected = false;
     }
+    return connected;
+  }
+
+  private void createHandler() throws IOException {
+    this.handler = new ControlPanelCommunicationHandler(
+        new Socket("127.0.0.1", 8765), this.logic);
+  }
+
+  private boolean attemptReconnect() {
+    int tries = RECONNECT_ATTEMPTS;
+
+    boolean result = false;
+
+    while (tries > 0 && !result) {
+
+      try {
+        createHandler();
+        result = true;
+      } catch (IOException ioException) {
+        Logger.info("Attempting to reconnect, " + tries + " tries left...");
+        wait(RECONNECT_ATTEMPT_WAIT_MILLIS);
+        tries--;
+      }
+
+    }
+    return result;
+  }
+
+  private static void wait(int delayMillis) {
+
+    try {
+      Thread.sleep(delayMillis);
+    } catch (InterruptedException e) {
+      Logger.error("Could not sleep");
+    }
+  }
+
+
+  @Override
+  public void close() {
+    this.stayConnected = false;
+  }
 
 }
