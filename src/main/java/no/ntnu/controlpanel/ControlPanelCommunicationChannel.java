@@ -128,6 +128,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
   @Override
   public void close() {
     this.stayConnected = false;
+    this.handler.close();
   }
 
 }
