@@ -2,13 +2,14 @@ package no.ntnu.controlpanel;
 
 import java.io.IOException;
 import java.net.Socket;
+
+import no.ntnu.exceptions.ConnectionFailedException;
 import no.ntnu.tools.Logger;
 
 public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
   private static final int RECONNECT_ATTEMPTS = 5;
   private static final int RECONNECT_ATTEMPT_WAIT_MILLIS = 5000;
-
 
   private boolean stayConnected;
   private ControlPanelCommunicationHandler handler;
@@ -58,36 +59,30 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
   @Override
   public boolean open() {
-    boolean connected;
     this.stayConnected = true;
     Logger.info("Connecting to socket");
 
-    try {
-      createHandler();
+    new Thread(() -> {
+      if (!attemptReconnect()) {
+        Logger.info("Failed to connect");
+        this.logic.onCommunicationChannelClosed();
+        return;
+      }
 
       sendInitialDataRequest();
-
-      new Thread(() -> {
-
-        while (this.stayConnected) {
-          try {
-            this.handler.handleCommunication();
-          } catch (IOException ioException) {
-            if (!attemptReconnect()) {
-              Logger.info("Could not connect, stopping communication channel.");
-              this.stayConnected = false;
-              this.logic.onCommunicationChannelClosed();
-            }
+      while (this.stayConnected) {
+        try {
+          this.handler.handleCommunication();
+        } catch (IOException ioException) {
+          if (!attemptReconnect()) {
+            Logger.info("Could not connect, stopping communication channel.");
+            this.stayConnected = false;
+            this.logic.onCommunicationChannelClosed();
           }
-
         }
-      }).start();
-
-      connected = true;
-    } catch (IOException e) {
-      connected = false;
-    }
-    return connected;
+      }
+    }).start();
+    return true;
   }
 
   private void createHandler() throws IOException {
@@ -116,7 +111,6 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
   }
 
   private static void wait(int delayMillis) {
-
     try {
       Thread.sleep(delayMillis);
     } catch (InterruptedException e) {
@@ -124,11 +118,11 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     }
   }
 
-
   @Override
   public void close() {
     this.stayConnected = false;
-    this.handler.close();
+    if (this.handler != null) {
+      this.handler.close();
+    }
   }
-
 }
