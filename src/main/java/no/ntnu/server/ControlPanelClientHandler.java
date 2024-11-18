@@ -14,59 +14,70 @@ public class ControlPanelClientHandler {
   private GreenhouseSimulator simulator;
   private CommunicationHandler handler;
 
-  public ControlPanelClientHandler(Socket socket, GreenhouseSimulator simulator) throws
-      IOException {
+  public ControlPanelClientHandler(Socket socket, GreenhouseSimulator simulator) throws IOException {
     this.handler = new CommunicationHandler(socket);
     this.simulator = simulator;
   }
 
-  
   public void handleCommunication() {
-    String message = this.handler.getMessage();
-    if (message != null) {
-      System.out.println("ControlPanelClientHandler: " + message);
-    }
-    while (message != null) {
-      Logger.info("Client message:" + message);
-      String args[] = message.split(" ");
+    boolean running = true;
 
-      try {
-        switch (args[0]) {
-          case "initialData":
-            sendInitialData();
-            break;
-          case "get":
-            getNodeValues(args);
-            break;
-          case "set":
-            setActuatorValue(args);
-            break;
-          case "add":
-            switch (args[1]){
-              case "sensor":
-                addSensorToNode(args);
-                break;
-              case "actuator":
-                addActuatorToNode(args);
-                break;
-            }
-          case "close":
-            closeConnection();
-            break;
-          default:
-            Logger.error("Unknown command: " + args[0]);
-            break;
-        }
-      } catch (NumberFormatException e) {
-        Logger.error(e.getMessage());
+    while (running) {
+      String message = this.handler.getMessage();
+    
+      if (message == null) {
+        running = false;
+      } else {
+        handleMessage(message);
       }
+    }
+  }
 
-      message = this.handler.getMessage();
+
+  /**
+   * Parses message and performs action based on parsed value.
+   * @param message
+   */
+  private void handleMessage(String message) {
+    Logger.info("Client message:" + message);
+    String args[] = message.split(" ");
+
+    try {
+      switch (args[0]) {
+        case "initialData":
+          sendInitialData();
+          break;
+        case "get":
+          getNodeValues(args);
+          break;
+        case "set":
+          setActuatorValue(args);
+          break;
+        case "add":
+          switch (args[1]) {
+            case "sensor":
+              addSensorToNode(args);
+              break;
+            case "actuator":
+              addActuatorToNode(args);
+              break;
+          }
+        case "close":
+          closeConnection();
+          break;
+        default:
+          Logger.error("Unknown command: " + args[0]);
+          break;
+      }
+    } catch (NumberFormatException e) {
+      Logger.error("Handeling messages failed because");
+      Logger.error(e.getMessage());
     }
   }
 
   /**
    * Add an actuator to a node.
+   * 
    * @param args The arguments for values.
    */
   private void addActuatorToNode(String[] args) {
@@ -77,6 +88,7 @@ public class ControlPanelClientHandler {
 
   /**
    * Add a sensor to a node.
+   * 
    * @param args The arguments for values.
    */
   private void addSensorToNode(String[] args) {
@@ -88,6 +100,7 @@ public class ControlPanelClientHandler {
 
   /**
    * Set the actuator value.
+   * 
    * @param args The arguments for values.
    */
   private void setActuatorValue(String[] args) {
@@ -97,6 +110,7 @@ public class ControlPanelClientHandler {
 
   /**
    * Get the node values.
+   * 
    * @param args The arguments for values.
    */
   private void getNodeValues(String[] args) {
@@ -108,16 +122,17 @@ public class ControlPanelClientHandler {
   /**
    * Send initial data to client
    */
-    public void sendInitialData() {
-      for (SensorActuatorNode node : this.simulator.getNodes()) {
-        sendNodeInformation(node);
-        initializeSensorListeners(node);
-        initializeActuatorListeners(node);
-      }
+  public void sendInitialData() {
+    for (SensorActuatorNode node : this.simulator.getNodes()) {
+      sendNodeInformation(node);
+      initializeSensorListeners(node);
+      initializeActuatorListeners(node);
     }
+  }
 
   /**
    * Send node information to client
+   * 
    * @param node The node to send information about
    */
   private void sendNodeInformation(SensorActuatorNode node) {
@@ -132,6 +147,7 @@ public class ControlPanelClientHandler {
 
   /**
    * Initialize actuator listeners
+   * 
    * @param node The node to initialize listeners for
    */
   private void initializeActuatorListeners(SensorActuatorNode node) {
@@ -146,16 +162,17 @@ public class ControlPanelClientHandler {
 
   /**
    * Initialize sensor listeners
+   * 
    * @param node The node to initialize listeners for
    */
   private void initializeSensorListeners(SensorActuatorNode node) {
     node.addSensorListener((List<Sensor> sensors) -> {
       String response = String.format("updateSensorsInformation %d", node.getId());
-        for (Sensor sensor : sensors) {
-            response = String.format("%s %s %f %s",response, sensor.getType(),
-                sensor.getReading().getValue(), sensor.getReading().getUnit());
-        }
-        this.handler.sendMessage(response);
+      for (Sensor sensor : sensors) {
+        response = String.format("%s %s %f %s", response, sensor.getType(),
+            sensor.getReading().getValue(), sensor.getReading().getUnit());
+      }
+      this.handler.sendMessage(response);
     });
   }
 

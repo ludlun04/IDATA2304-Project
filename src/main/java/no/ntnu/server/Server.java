@@ -52,11 +52,10 @@ public abstract class Server {
           Logger.info("Clients = " + this.handlers.size());
 
           // Handle client for socket lifetime
-          while (newSocket.isConnected()) {
-            newHandler.handleCommunication();
-          }
+          newHandler.handleCommunication();
         }).start();
       } catch (IOException e) {
+        Logger.error("Waiting for client stopped because");
         Logger.error(e.getMessage());
         finished = true;
       }
@@ -72,9 +71,13 @@ public abstract class Server {
       Logger.error(e.getMessage());
     }
 
+    Logger.info("Closed Server");
+
     for (ControlPanelClientHandler controlPanelClientHandler : handlers) {
       controlPanelClientHandler.closeConnection();
     }
+
+    Logger.info("All communication closed");
   }
 
   protected abstract ControlPanelClientHandler getClientHandler(Socket socket);

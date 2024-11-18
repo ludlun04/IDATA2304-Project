@@ -6,12 +6,15 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import no.ntnu.tools.Logger;
+
 /**
  * Class for handling client
  */
 public class CommunicationHandler {
   protected BufferedReader inputReader;
   private final PrintWriter outputWriter;
+  private Socket socket;
 
   /**
    * Constructor for client handeler
@@ -21,6 +24,7 @@ public class CommunicationHandler {
    *                          socket
    */
   public CommunicationHandler(Socket clientSocket) throws IOException{
+      this.socket = clientSocket;
       this.inputReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
       this.outputWriter = new PrintWriter(clientSocket.getOutputStream(), true);
   }
@@ -52,10 +56,13 @@ public class CommunicationHandler {
 
   public void close() {
     try {
-      this.inputReader.close();
-      this.outputWriter.close();
+      this.socket.close();
+      // this.inputReader.close();
+      // this.outputWriter.close();
+      
     } catch (IOException e) {
-      System.err.println(e.getMessage());
+      Logger.error("Failed to close because");
+      Logger.error(e.getMessage());
     }
   }
 }
