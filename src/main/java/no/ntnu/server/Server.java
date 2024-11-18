@@ -6,28 +6,25 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import no.ntnu.tools.Logger;
+
 /**
  * Class representing a server accepting incoming connection requests
  */
-public class Server {
-  private ServerSocket nodeServerSocket;
-  private ServerSocket controlPanelServerSocket;
-  private List<NodeClientHandler> SensorActuatorNodes;
-  private List<ControlPanelClientHandler> ControlPanels;
-
+public abstract class Server {
+  private ServerSocket serverSocket;
+  private List<ControlPanelClientHandler> handlers;
 
   /**
    * Constructor of server
    *
-   * @param nodePort port to listen for sensor actuator nodes
-   * @param controlPanelPort port to listen for control panels
+   * @param port port to listen for clients
    */
-  public Server(int nodePort, int controlPanelPort) {
-    this.SensorActuatorNodes = new ArrayList<>();
-    this.ControlPanels = new ArrayList<>();
+  public Server(int port) {
+    this.handlers = new ArrayList<>();
+
     try {
-      this.nodeServerSocket = new ServerSocket(nodePort);
-      this.controlPanelServerSocket = new ServerSocket(controlPanelPort);
+      this.serverSocket = new ServerSocket(port);
     } catch (IOException e) {
       System.out.println("Could not establish server socket");
       throw new RuntimeException(e);
@@ -38,41 +35,33 @@ public class Server {
    * Runs the server
    * <p>
    * Waits for clients and listens to commands.
+   * </p>
    */
   public void run() {
-    while (true) {
-      System.out.println("Looking for new client...");
+    boolean finished = false;
+    while (!finished) {
+      Logger.info("Looking for new client...");
 
       try {
-        Socket newNodeSocket = this.nodeServerSocket.accept();
-        Socket newControlPanelSocket = this.controlPanelServerSocket.accept();
-        NodeClientHandler newNodeHandler = new NodeClientHandler(newNodeSocket);
-        ControlPanelClientHandler newControlPanelHandler =
-            new ControlPanelClientHandler(newControlPanelSocket);
-        this.SensorActuatorNodes.add(newNodeHandler);
-        this.ControlPanels.add(newControlPanelHandler);
+        Socket newSocket = this.serverSocket.accept();
+
+        ControlPanelClientHandler newHandler = getClientHandler(newSocket);
+        this.handlers.add(newHandler);
 
         new Thread(() -> {
-          System.out.println(
-              "SensorActuatorNodes = " + this.SensorActuatorNodes.size()
-                  + " ControlPanels = " + this.ControlPanels.size());
-
-          newNodeHandler.sendMessage("Hello #" + this.SensorActuatorNodes.size());
-          newControlPanelHandler.sendMessage("Hello #" + this.ControlPanels.size());
+          Logger.info("Clients = " + this.handlers.size());
 
           // Handle client for socket lifetime
-          while (newNodeSocket.isConnected()) {
-            newNodeHandler.handleClient();
-          }
-          // Handle client for socket lifetime
-          while (newControlPanelSocket.isConnected()) {
-            newControlPanelHandler.handleClient();
+          while (newSocket.isConnected()) {
+            newHandler.handleCommunication();
           }
         }).start();
       } catch (IOException e) {
-        System.err.println(e.getMessage());
+        Logger.error(e.getMessage());
+        finished = true;
       }
     }
   }
 
+  protected abstract ControlPanelClientHandler getClientHandler(Socket socket);
 }

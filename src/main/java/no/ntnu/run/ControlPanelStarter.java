@@ -1,9 +1,12 @@
 package no.ntnu.run;
 
+import java.io.IOException;
 import no.ntnu.controlpanel.CommunicationChannel;
+import no.ntnu.controlpanel.ControlPanelCommunicationChannel;
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.FakeCommunicationChannel;
 import no.ntnu.gui.controlpanel.ControlPanelApplication;
+import no.ntnu.listeners.common.CommunicationChannelListener;
 import no.ntnu.tools.Logger;
 
 /**
@@ -13,6 +16,7 @@ import no.ntnu.tools.Logger;
  */
 public class ControlPanelStarter {
   private final boolean fake;
+  private CommunicationChannel channel;
 
   public ControlPanelStarter(boolean fake) {
     this.fake = fake;
@@ -39,8 +43,8 @@ public class ControlPanelStarter {
 
   private void start() {
     ControlPanelLogic logic = new ControlPanelLogic();
-    CommunicationChannel channel = initiateCommunication(logic, fake);
-    ControlPanelApplication.startApp(logic, channel);
+    this.channel = initiateCommunication(logic, fake);
+    ControlPanelApplication.startApp(logic, this.channel);
     // This code is reached only after the GUI-window is closed
     Logger.info("Exiting the control panel application");
     stopCommunication();
@@ -58,9 +62,19 @@ public class ControlPanelStarter {
 
   private CommunicationChannel initiateSocketCommunication(ControlPanelLogic logic) {
     // TODO - here you initiate TCP/UDP socket communication
+    // TODO - Setup communication channel listener to see if communication is closed
     // You communication class(es) may want to get reference to the logic and call necessary
     // logic methods when events happen (for example, when sensor data is received)
-    return null;
+
+
+    CommunicationChannel communicationChannel = null;
+    try {
+      communicationChannel = new ControlPanelCommunicationChannel(logic);
+    } catch (IOException e) {
+      Logger.error(e.getMessage());
+    }
+    logic.setCommunicationChannel(communicationChannel);
+    return communicationChannel;
   }
 
   private CommunicationChannel initiateFakeSpawner(ControlPanelLogic logic) {
@@ -93,5 +107,6 @@ public class ControlPanelStarter {
 
   private void stopCommunication() {
     // TODO - here you stop the TCP/UDP socket communication
+    channel.close();
   }
 }

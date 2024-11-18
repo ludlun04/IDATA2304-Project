@@ -41,7 +41,7 @@ public class MainGreenhouseGuiWindow extends Scene {
   }
 
   private static Node createCopyrightNotice() {
-    Label l = new Label("Image generated with Picsart");
+    Label l = new Label("Source NTNU");
     l.setFont(Font.font(10));
     return l;
   }
@@ -49,7 +49,7 @@ public class MainGreenhouseGuiWindow extends Scene {
   private static Node createMasterImage() {
     Node node;
     try {
-      InputStream fileContent = new FileInputStream("images/picsart_chuck.jpeg");
+      InputStream fileContent = new FileInputStream("images/business_arne.png");
       ImageView imageView = new ImageView();
       imageView.setImage(new Image(fileContent));
       imageView.setFitWidth(100);
