@@ -104,7 +104,7 @@ public class GreenhouseSimulator extends Server {
                 periodicSwitch.stop();
             }
         } else {
-            // TODO - here you stop the TCP/UDP communication
+            super.stop();
         }
     }
 

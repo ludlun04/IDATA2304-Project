@@ -63,5 +63,19 @@ public abstract class Server {
     }
   }
 
+  public void stop() {
+    Logger.info("Server stopping");
+    try {
+      this.serverSocket.close();
+    } catch (Exception e) {
+      Logger.error("failed to close communication due to:");
+      Logger.error(e.getMessage());
+    }
+
+    for (ControlPanelClientHandler controlPanelClientHandler : handlers) {
+      controlPanelClientHandler.closeConnection();
+    }
+  }
+
   protected abstract ControlPanelClientHandler getClientHandler(Socket socket);
 }

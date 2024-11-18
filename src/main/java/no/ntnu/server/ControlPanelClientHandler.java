@@ -159,7 +159,7 @@ public class ControlPanelClientHandler {
     });
   }
 
-  private void closeConnection() {
+  public void closeConnection() {
     this.handler.close();
   }
 }
