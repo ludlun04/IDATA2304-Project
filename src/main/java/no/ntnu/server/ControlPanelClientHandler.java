@@ -162,5 +162,4 @@ public class ControlPanelClientHandler {
   private void closeConnection() {
     this.handler.close();
   }
-
 }

@@ -64,5 +64,4 @@ public abstract class Server {
   }
 
   protected abstract ControlPanelClientHandler getClientHandler(Socket socket);
-
 }
