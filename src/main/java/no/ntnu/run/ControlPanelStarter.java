@@ -70,7 +70,7 @@ public class ControlPanelStarter {
     CommunicationChannel communicationChannel = null;
     try {
       communicationChannel = new ControlPanelCommunicationChannel(logic);
-    } catch (IOException e) {
+    } catch (IllegalArgumentException e) {
       Logger.error(e.getMessage());
     }
     logic.setCommunicationChannel(communicationChannel);

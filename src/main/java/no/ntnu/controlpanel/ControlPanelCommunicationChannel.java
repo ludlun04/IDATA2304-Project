@@ -14,7 +14,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
   private ControlPanelCommunicationHandler handler;
   private ControlPanelLogic logic;
 
-  public ControlPanelCommunicationChannel(ControlPanelLogic logic) throws IOException {
+  public ControlPanelCommunicationChannel(ControlPanelLogic logic) throws IllegalArgumentException {
     if (logic == null) {
       throw new IllegalArgumentException("logic cannot be null");
     }
