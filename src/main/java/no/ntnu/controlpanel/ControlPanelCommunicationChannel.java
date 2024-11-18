@@ -79,39 +79,36 @@ public class ControlPanelCommunicationChannel extends CommunicationHandler
 
   public void sendPublicKeyInParts(PublicKey publicKey) {
     try {
-      byte[] publicKeyBytes = publicKey.getEncoded();
+      byte[] publicKeyBytes = this.publicKey.getEncoded();
       int partSize = 200;
       for (int i = 0; i < publicKeyBytes.length; i += partSize) {
         int end = Math.min(publicKeyBytes.length, i + partSize);
         byte[] part = Arrays.copyOfRange(publicKeyBytes, i, end);
         String encodedPart = Base64.getEncoder().encodeToString(part);
-        super.sendMessage("publicKeyPart " + encodedPart);
+        super.sendMessage(encryptMessageRSA(encodedPart, publicKey));
       }
-      super.sendMessage("publicKeyEnd");
+      super.sendMessage(encryptMessageRSA("publicKeyEnd", publicKey));
     } catch (Exception e) {
       Logger.error("Error sending public key in parts: " + e.getMessage());
     }
   }
 
-  public PublicKey handlePublicKeyParts(String[] args) {
+  public PublicKey handlePublicKeyParts() {
+    StringBuilder message = new StringBuilder();
+    String currentMessage = super.getMessage();
+    while (!currentMessage.equals("publicKeyEnd")) {
+      message.append(currentMessage);
+      currentMessage = super.getMessage();
+      Logger.info(currentMessage);
+    }
+    String[] args = message.toString().split(" ");
+
     PublicKey publicKey = null;
     try {
-      if (args[0].equals("publicKeyPart")) {
-        byte[] part = Base64.getDecoder().decode(args[1]);
-        publicKeyPartsBuffer.add(part);
-      } else if (args[0].equals("publicKeyEnd")) {
-        int totalLength = publicKeyPartsBuffer.stream().mapToInt(part -> part.length).sum();
-        byte[] publicKeyBytes = new byte[totalLength];
-        int currentIndex = 0;
-        for (byte[] part : publicKeyPartsBuffer) {
-          System.arraycopy(part, 0, publicKeyBytes, currentIndex, part.length);
-          currentIndex += part.length;
-        }
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        publicKey = keyFactory.generatePublic(keySpec);
-        publicKeyPartsBuffer.clear();
-      }
+      byte[] publicKeyBytes = Base64.getDecoder().decode(args[0]);
+      X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
+      KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+      publicKey = keyFactory.generatePublic(keySpec);
     } catch (Exception e) {
       Logger.error("Error handling public key parts: " + e.getMessage());
     }
@@ -145,9 +142,7 @@ public class ControlPanelCommunicationChannel extends CommunicationHandler
   }
 
   private void publicKeyExchange() {
-    String message = super.getMessage();
-    String[] args = message.split(" ");
-    sendPublicKeyInParts(handlePublicKeyParts(args));
+    sendPublicKeyInParts(handlePublicKeyParts());
   }
 
   public void handleCommunication() {

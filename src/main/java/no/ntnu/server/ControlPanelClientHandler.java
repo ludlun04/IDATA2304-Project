@@ -46,11 +46,8 @@ public class ControlPanelClientHandler extends CommunicationHandler {
    */
   public void createCipherCommunication() {
     sendPublicKey();
-    String message = decryptMessageRSA(super.getMessage());
-    if (message != null) {
-      String[] args = message.split(" ");
-      sendAESKey(handlePublicKeyParts(args));
-    }
+    Logger.info("Public key sent");
+    sendAESKey(handlePublicKeyParts());
   }
 
   @Override
@@ -217,7 +214,8 @@ public class ControlPanelClientHandler extends CommunicationHandler {
         int end = Math.min(publicKeyBytes.length, i + partSize);
         byte[] part = Arrays.copyOfRange(publicKeyBytes, i, end);
         String encodedPart = Base64.getEncoder().encodeToString(part);
-        super.sendMessage("publicKeyPart " + encodedPart);
+        super.sendMessage(encodedPart);
+        Logger.info("Public key part sent");
       }
       super.sendMessage("publicKeyEnd");
     } catch (Exception e) {
@@ -225,25 +223,22 @@ public class ControlPanelClientHandler extends CommunicationHandler {
     }
   }
 
-  public PublicKey handlePublicKeyParts(String[] args) {
+  public PublicKey handlePublicKeyParts() {
+    StringBuilder message = new StringBuilder();
+    String currentMessage = decryptMessageRSA(super.getMessage());
+    while (!currentMessage.equals("publicKeyEnd")) {
+      message.append(currentMessage);
+      currentMessage = decryptMessageRSA(super.getMessage());
+      Logger.info("Current message: " + currentMessage);
+    }
+    String[] args = message.toString().split(" ");
+
     PublicKey publicKey = null;
     try {
-      if (args[0].equals("publicKeyPart")) {
-        byte[] part = Base64.getDecoder().decode(args[1]);
-        publicKeyPartsBuffer.add(part);
-      } else if (args[0].equals("publicKeyEnd")) {
-        int totalLength = publicKeyPartsBuffer.stream().mapToInt(part -> part.length).sum();
-        byte[] publicKeyBytes = new byte[totalLength];
-        int currentIndex = 0;
-        for (byte[] part : publicKeyPartsBuffer) {
-          System.arraycopy(part, 0, publicKeyBytes, currentIndex, part.length);
-          currentIndex += part.length;
-        }
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        publicKey = keyFactory.generatePublic(keySpec);
-        publicKeyPartsBuffer.clear();
-      }
+      byte[] publicKeyBytes = Base64.getDecoder().decode(args[0]);
+      X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
+      KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+      publicKey = keyFactory.generatePublic(keySpec);
     } catch (Exception e) {
       Logger.error("Error handling public key parts: " + e.getMessage());
     }
@@ -257,10 +252,8 @@ public class ControlPanelClientHandler extends CommunicationHandler {
    */
   public void sendAESKey(PublicKey clientPublicKey) {
     try {
-      Cipher cipher = Cipher.getInstance("RSA");
-      cipher.init(Cipher.ENCRYPT_MODE, clientPublicKey);
-      byte[] encryptedKey = cipher.doFinal(this.aesKey.getEncoded());
-      super.sendMessage("aesKey " + Base64.getEncoder().encodeToString(encryptedKey));
+      super.sendMessage(encryptMessageRSA("aesKey " + this.aesKey, clientPublicKey));
+      Logger.info("AES key sent");
     } catch (Exception e) {
       Logger.error(e.getMessage());
     }
@@ -277,6 +270,25 @@ public class ControlPanelClientHandler extends CommunicationHandler {
     try {
       Cipher cipher = Cipher.getInstance("AES");
       cipher.init(Cipher.ENCRYPT_MODE, this.aesKey);
+      byte[] encryptedMessage = cipher.doFinal(message.getBytes());
+      result = Base64.getEncoder().encodeToString(encryptedMessage);
+    } catch (Exception e) {
+      Logger.error(e.getMessage());
+    }
+    return result;
+  }
+
+  /**
+   * Encrypt a message with RSA
+   *
+   * @param message The message to encrypt
+   * @return The encrypted message
+   */
+  private String encryptMessageRSA(String message, PublicKey publicKey) {
+    String result = null;
+    try {
+      Cipher cipher = Cipher.getInstance("RSA");
+      cipher.init(Cipher.ENCRYPT_MODE, publicKey);
       byte[] encryptedMessage = cipher.doFinal(message.getBytes());
       result = Base64.getEncoder().encodeToString(encryptedMessage);
     } catch (Exception e) {
