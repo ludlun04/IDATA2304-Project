@@ -10,18 +10,19 @@ import java.util.List;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
 
-public class ControlPanelClientHandler extends CommunicationHandler {
+public class ControlPanelClientHandler {
   private GreenhouseSimulator simulator;
+  private CommunicationHandler handler;
 
   public ControlPanelClientHandler(Socket socket, GreenhouseSimulator simulator) throws
       IOException {
-    super(socket);
+    this.handler = new CommunicationHandler(socket);
     this.simulator = simulator;
   }
 
-  @Override
+  
   public void handleCommunication() {
-    String message = super.getMessage();
+    String message = this.handler.getMessage();
     if (message != null) {
       System.out.println("ControlPanelClientHandler: " + message);
     }
@@ -60,7 +61,7 @@ public class ControlPanelClientHandler extends CommunicationHandler {
         Logger.error(e.getMessage());
       }
 
-      message = super.getMessage();
+      message = this.handler.getMessage();
     }
   }
 
@@ -100,7 +101,7 @@ public class ControlPanelClientHandler extends CommunicationHandler {
    */
   private void getNodeValues(String[] args) {
     for (Sensor sensor : this.simulator.getNode(Integer.parseInt(args[1])).getSensors()) {
-      super.sendMessage("" + sensor.getReading().getValue());
+      this.handler.sendMessage("" + sensor.getReading().getValue());
     }
   }
 
@@ -126,7 +127,7 @@ public class ControlPanelClientHandler extends CommunicationHandler {
       response = String.format("%s %d %s", response, actuator.getId(), actuator.getType());
     }
 
-    super.sendMessage(response);
+    this.handler.sendMessage(response);
   }
 
   /**
@@ -139,7 +140,7 @@ public class ControlPanelClientHandler extends CommunicationHandler {
           "updateActuatorInformation %d %d %b", nodeID,
           actuator.getId(),
           actuator.isOn());
-      super.sendMessage(response);
+      this.handler.sendMessage(response);
     });
   }
 
@@ -154,12 +155,12 @@ public class ControlPanelClientHandler extends CommunicationHandler {
             response = String.format("%s %s %f %s",response, sensor.getType(),
                 sensor.getReading().getValue(), sensor.getReading().getUnit());
         }
-        super.sendMessage(response);
+        this.handler.sendMessage(response);
     });
   }
 
   private void closeConnection() {
-    super.close();
+    this.handler.close();
   }
 
 }

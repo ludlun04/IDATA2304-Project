@@ -1,16 +1,8 @@
 package no.ntnu.controlpanel;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-
-import no.ntnu.greenhouse.Actuator;
-import no.ntnu.greenhouse.SensorReading;
 import no.ntnu.tools.Logger;
-import no.ntnu.utils.CommunicationHandler;
 
 public class ControlPanelCommunicationChannel implements CommunicationChannel {
 

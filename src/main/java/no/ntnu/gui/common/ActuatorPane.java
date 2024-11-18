@@ -7,7 +7,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
+// import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.HBox;
@@ -52,20 +52,21 @@ public class ActuatorPane extends TitledPane {
     return actuatorGui;
   }
 
-  private CheckBox createActuatorCheckbox(Actuator actuator) {
-    CheckBox checkbox = new CheckBox();
-    SimpleBooleanProperty isSelected = new SimpleBooleanProperty(actuator.isOn());
-    actuatorActive.put(actuator, isSelected);
-    checkbox.selectedProperty().bindBidirectional(isSelected);
-    checkbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-      if (newValue != null && newValue) {
-        actuator.turnOn();
-      } else {
-        actuator.turnOff();
-      }
-    });
-    return checkbox;
-  }
+
+  // private CheckBox createActuatorCheckbox(Actuator actuator) {
+  //   CheckBox checkbox = new CheckBox();
+  //   SimpleBooleanProperty isSelected = new SimpleBooleanProperty(actuator.isOn());
+  //   actuatorActive.put(actuator, isSelected);
+  //   checkbox.selectedProperty().bindBidirectional(isSelected);
+  //   checkbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+  //     if (newValue != null && newValue) {
+  //       actuator.turnOn();
+  //     } else {
+  //       actuator.turnOff();
+  //     }
+  //   });
+  //   return checkbox;
+  // }
 
   private Button createActuatorButton(Actuator actuator) {
     Button button = new Button();

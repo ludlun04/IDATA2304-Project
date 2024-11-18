@@ -9,7 +9,7 @@ import java.net.Socket;
 /**
  * Class for handling client
  */
-public abstract class CommunicationHandler {
+public class CommunicationHandler {
   protected BufferedReader inputReader;
   private final PrintWriter outputWriter;
 
@@ -50,12 +50,7 @@ public abstract class CommunicationHandler {
     return result;
   }
 
-  /**
-   * Abstract method for handling communication
-   */
-  public abstract void handleCommunication() throws IOException;
-
-  protected void close() {
+  public void close() {
     try {
       this.inputReader.close();
       this.outputWriter.close();

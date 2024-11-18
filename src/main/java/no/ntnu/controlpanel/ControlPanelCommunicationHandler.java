@@ -9,19 +9,26 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class ControlPanelCommunicationHandler extends CommunicationHandler {
+public class ControlPanelCommunicationHandler {
 
   private ControlPanelLogic logic;
+  private CommunicationHandler handler;
 
   public ControlPanelCommunicationHandler(Socket socket, ControlPanelLogic logic) throws IOException {
-    super(socket);
+    this.handler = new CommunicationHandler(socket);
     this.logic = logic;
   }
 
-  @Override
-  public void handleCommunication() throws IOException {
+  /**
+   * Sends a message to the client.
+   * @param message String to be sent to the client
+   */
+  public void sendMessage(String message) {
+    this.handler.sendMessage(message);
+  }
 
-      String message = super.getMessage();
+  public void handleCommunication() throws IOException {
+      String message = this.handler.getMessage();
 
       if (message == null) {
         throw new IOException("Communication interrupted");

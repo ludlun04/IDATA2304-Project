@@ -7,14 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.ntnu.tools.Logger;
-import no.ntnu.utils.CommunicationHandler;
 
 /**
  * Class representing a server accepting incoming connection requests
  */
 public abstract class Server {
   private ServerSocket serverSocket;
-  private List<CommunicationHandler> handlers;
+  private List<ControlPanelClientHandler> handlers;
 
   /**
    * Constructor of server
@@ -46,7 +45,7 @@ public abstract class Server {
       try {
         Socket newSocket = this.serverSocket.accept();
 
-        CommunicationHandler newHandler = getClientHandler(newSocket);
+        ControlPanelClientHandler newHandler = getClientHandler(newSocket);
         this.handlers.add(newHandler);
 
         new Thread(() -> {
@@ -54,11 +53,7 @@ public abstract class Server {
 
           // Handle client for socket lifetime
           while (newSocket.isConnected()) {
-            try {
-              newHandler.handleCommunication();
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
+            newHandler.handleCommunication();
           }
         }).start();
       } catch (IOException e) {
@@ -68,6 +63,6 @@ public abstract class Server {
     }
   }
 
-  protected abstract CommunicationHandler getClientHandler(Socket socket);
+  protected abstract ControlPanelClientHandler getClientHandler(Socket socket);
 
 }

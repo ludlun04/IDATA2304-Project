@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import no.ntnu.listeners.greenhouse.NodeStateListener;
-import no.ntnu.utils.CommunicationHandler;
 import no.ntnu.server.ControlPanelClientHandler;
 import no.ntnu.server.Server;
 import no.ntnu.tools.Logger;
@@ -129,13 +128,13 @@ public class GreenhouseSimulator extends Server {
     }
 
     @Override
-    protected CommunicationHandler getClientHandler(Socket socket) {
+    protected ControlPanelClientHandler getClientHandler(Socket socket) {
       ControlPanelClientHandler result = null;
       try {
         result = new ControlPanelClientHandler(socket, this);
       } catch (IOException e) {
         Logger.error(e.getMessage());
       }
-        return result;
+      return result;
     }
 }
