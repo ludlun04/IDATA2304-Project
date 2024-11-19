@@ -1,7 +1,7 @@
 package no.ntnu.server;
 
 import java.net.Socket;
-import no.ntnu.greenhouse.SensorActuatorNode;
+import no.ntnu.greenhouse.GreenhouseNode;
 
 public class NodeClientHandler extends ClientHandler {
 

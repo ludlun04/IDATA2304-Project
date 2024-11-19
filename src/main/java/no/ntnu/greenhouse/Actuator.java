@@ -118,7 +118,7 @@ public class Actuator {
    *
    * @param node The sensor node to be affected by this actuator.
    */
-  public void applyImpact(SensorActuatorNode node) {
+  public void applyImpact(GreenhouseNode node) {
     for (Map.Entry<String, Double> impactEntry : impacts.entrySet()) {
       String sensorType = impactEntry.getKey();
       double impact = impactEntry.getValue();

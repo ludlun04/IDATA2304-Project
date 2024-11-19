@@ -5,8 +5,8 @@ import java.util.Map;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import no.ntnu.greenhouse.GreenhouseSimulator;
-import no.ntnu.greenhouse.SensorActuatorNode;
+import no.ntnu.greenhouse.GreenhouseServer;
+import no.ntnu.greenhouse.GreenhouseNode;
 import no.ntnu.listeners.greenhouse.NodeStateListener;
 import no.ntnu.tools.Logger;
 
@@ -14,8 +14,8 @@ import no.ntnu.tools.Logger;
  * Run a greenhouse simulation with a graphical user interface (GUI), with JavaFX.
  */
 public class GreenhouseApplication extends Application implements NodeStateListener {
-  private static GreenhouseSimulator simulator;
-  private final Map<SensorActuatorNode, NodeGuiWindow> nodeWindows = new HashMap<>();
+  private static GreenhouseServer simulator;
+  private final Map<GreenhouseNode, NodeGuiWindow> nodeWindows = new HashMap<>();
   private Stage mainStage;
 
   @Override
@@ -50,12 +50,12 @@ public class GreenhouseApplication extends Application implements NodeStateListe
    */
   public static void startApp(boolean fake) {
     Logger.info("Running greenhouse simulator with JavaFX GUI...");
-    simulator = new GreenhouseSimulator(fake, 8765);
+    simulator = new GreenhouseServer(fake, 8765);
     launch();
   }
 
   @Override
-  public void onNodeReady(SensorActuatorNode node) {
+  public void onNodeReady(GreenhouseNode node) {
     Logger.info("Starting window for node " + node.getId());
     NodeGuiWindow window = new NodeGuiWindow(node);
     nodeWindows.put(node, window);
@@ -63,7 +63,7 @@ public class GreenhouseApplication extends Application implements NodeStateListe
   }
 
   @Override
-  public void onNodeStopped(SensorActuatorNode node) {
+  public void onNodeStopped(GreenhouseNode node) {
     NodeGuiWindow window = nodeWindows.remove(node);
     if (window != null) {
       Platform.runLater(window::close);

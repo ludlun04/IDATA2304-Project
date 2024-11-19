@@ -2,19 +2,19 @@ package no.ntnu.server;
 
 import java.io.IOException;
 import java.net.Socket;
-import no.ntnu.greenhouse.GreenhouseSimulator;
+import no.ntnu.greenhouse.GreenhouseServer;
 import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.Sensor;
-import no.ntnu.greenhouse.SensorActuatorNode;
+import no.ntnu.greenhouse.GreenhouseNode;
 import java.util.List;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
 
 public class ControlPanelClientHandler {
-  private GreenhouseSimulator simulator;
+  private GreenhouseServer simulator;
   private CommunicationHandler handler;
 
-  public ControlPanelClientHandler(Socket socket, GreenhouseSimulator simulator) throws IOException {
+  public ControlPanelClientHandler(Socket socket, GreenhouseServer simulator) throws IOException {
     this.handler = new CommunicationHandler(socket);
     this.simulator = simulator;
   }
@@ -123,7 +123,7 @@ public class ControlPanelClientHandler {
    * Send initial data to client
    */
   public void sendInitialData() {
-    for (SensorActuatorNode node : this.simulator.getNodes()) {
+    for (GreenhouseNode node : this.simulator.getNodes()) {
       sendNodeInformation(node);
       initializeSensorListeners(node);
       initializeActuatorListeners(node);
@@ -135,7 +135,7 @@ public class ControlPanelClientHandler {
    * 
    * @param node The node to send information about
    */
-  private void sendNodeInformation(SensorActuatorNode node) {
+  private void sendNodeInformation(GreenhouseNode node) {
     String response = String.format("add %d", node.getId());
 
     for (Actuator actuator : node.getActuators()) {
@@ -150,7 +150,7 @@ public class ControlPanelClientHandler {
    * 
    * @param node The node to initialize listeners for
    */
-  private void initializeActuatorListeners(SensorActuatorNode node) {
+  private void initializeActuatorListeners(GreenhouseNode node) {
     node.addActuatorListener((int nodeID, Actuator actuator) -> {
       String response = String.format(
           "updateActuatorInformation %d %d %b", nodeID,
@@ -165,7 +165,7 @@ public class ControlPanelClientHandler {
    * 
    * @param node The node to initialize listeners for
    */
-  private void initializeSensorListeners(SensorActuatorNode node) {
+  private void initializeSensorListeners(GreenhouseNode node) {
     node.addSensorListener((List<Sensor> sensors) -> {
       String response = String.format("updateSensorsInformation %d", node.getId());
       for (Sensor sensor : sensors) {

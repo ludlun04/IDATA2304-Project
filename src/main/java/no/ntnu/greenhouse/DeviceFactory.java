@@ -32,9 +32,9 @@ public class DeviceFactory {
    * @param heaterCount            Number of heaters the device is connected to
    * @return The created sensor/actuator device, with a unique ID
    */
-  public static SensorActuatorNode createNode(int temperatureSensorCount, int humiditySensorCount,
+  public static GreenhouseNode createNode(int temperatureSensorCount, int humiditySensorCount,
                                               int windowCount, int fanCount, int heaterCount) {
-    SensorActuatorNode node = new SensorActuatorNode(generateUniqueNodeId());
+    GreenhouseNode node = new GreenhouseNode(generateUniqueNodeId());
     if (temperatureSensorCount > 0) {
       node.addSensors(DeviceFactory.createTemperatureSensor(), temperatureSensorCount);
     }
@@ -53,7 +53,7 @@ public class DeviceFactory {
     return node;
   }
 
-  static void addActuators(SensorActuatorNode node, Actuator template, int n) {
+  static void addActuators(GreenhouseNode node, Actuator template, int n) {
     if (template == null) {
       throw new IllegalArgumentException("Actuator template is missing");
     }

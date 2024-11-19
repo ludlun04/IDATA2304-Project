@@ -1,6 +1,6 @@
 package no.ntnu.listeners.greenhouse;
 
-import no.ntnu.greenhouse.SensorActuatorNode;
+import no.ntnu.greenhouse.GreenhouseNode;
 
 /**
  * Listener which receives node lifecycle events.
@@ -14,12 +14,12 @@ public interface NodeStateListener {
    *
    * @param node the node which is ready now
    */
-  void onNodeReady(SensorActuatorNode node);
+  void onNodeReady(GreenhouseNode node);
 
   /**
    * This event is fired when a sensor/actuator node has stopped (shut down_.
    *
    * @param node The node which is stopped
    */
-  void onNodeStopped(SensorActuatorNode node);
+  void onNodeStopped(GreenhouseNode node);
 }

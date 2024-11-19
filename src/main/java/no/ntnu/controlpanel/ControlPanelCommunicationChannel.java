@@ -79,6 +79,8 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
             this.stayConnected = false;
             this.logic.onCommunicationChannelClosed();
           }
+        } catch (Exception e) {
+          Logger.error(e.getMessage());
         }
       }
     }).start();
