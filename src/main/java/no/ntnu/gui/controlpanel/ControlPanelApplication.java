@@ -79,9 +79,9 @@ public class ControlPanelApplication extends Application implements GreenhouseEv
   }
 
   private static Label createEmptyContent() {
-    Label l = new Label("Waiting for node data...");
-    l.setAlignment(Pos.CENTER);
-    return l;
+    Label label = new Label("Attempting to connect to server");
+    label.setAlignment(Pos.CENTER);
+    return label;
   }
 
   @Override

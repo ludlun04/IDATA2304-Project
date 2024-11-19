@@ -6,7 +6,6 @@ import no.ntnu.controlpanel.ControlPanelCommunicationChannel;
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.FakeCommunicationChannel;
 import no.ntnu.gui.controlpanel.ControlPanelApplication;
-import no.ntnu.listeners.common.CommunicationChannelListener;
 import no.ntnu.tools.Logger;
 
 /**
@@ -32,7 +31,7 @@ public class ControlPanelStarter {
    *             Apply the changes.
    */
   public static void main(String[] args) {
-    boolean fake = false;// make it true to test in fake mode
+    boolean fake = false; // make it true to test in fake mode
     if (args.length == 1 && "fake".equals(args[0])) {
       fake = true;
       Logger.info("Using FAKE events");
