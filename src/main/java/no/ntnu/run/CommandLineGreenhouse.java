@@ -21,7 +21,7 @@ public class CommandLineGreenhouse {
       fake = true;
       Logger.info("Using FAKE events");
     }
-    GreenhouseSimulator simulator = new GreenhouseSimulator(fake, 8541);
+    GreenhouseSimulator simulator = new GreenhouseSimulator(fake);
     simulator.initialize();
     simulator.start();
   }
