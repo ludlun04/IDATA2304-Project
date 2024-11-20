@@ -13,7 +13,6 @@ import no.ntnu.tools.Logger;
  */
 public abstract class Server {
   private ServerSocket serverSocket;
-  private List<ControlPanelClientHandler> handlers;
 
   /**
    * Constructor of server
@@ -21,8 +20,6 @@ public abstract class Server {
    * @param port port to listen for clients
    */
   public Server(int port) {
-    this.handlers = new ArrayList<>();
-
     try {
       this.serverSocket = new ServerSocket(port);
     } catch (IOException e) {
@@ -44,18 +41,7 @@ public abstract class Server {
 
       try {
         Socket newSocket = this.serverSocket.accept();
-
-        ControlPanelClientHandler newHandler = getClientHandler(newSocket);
-        this.handlers.add(newHandler);
-
-        new Thread(() -> {
-          Logger.info("Clients = " + this.handlers.size());
-
-          // Handle client for socket lifetime
-          while (newSocket.isConnected()) {
-            newHandler.handleCommunication();
-          }
-        }).start();
+        this.socketConnected(newSocket);
       } catch (IOException e) {
         Logger.error(e.getMessage());
         finished = true;
@@ -63,5 +49,5 @@ public abstract class Server {
     }
   }
 
-  protected abstract ControlPanelClientHandler getClientHandler(Socket socket);
+  protected abstract void socketConnected(Socket socket);
 }

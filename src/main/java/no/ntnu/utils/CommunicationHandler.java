@@ -12,6 +12,7 @@ import java.net.Socket;
 public class CommunicationHandler {
   protected BufferedReader inputReader;
   private final PrintWriter outputWriter;
+  private final Socket socket;
 
   /**
    * Constructor for client handeler
@@ -20,9 +21,10 @@ public class CommunicationHandler {
    * @throws RuntimeException if constructor fails to open communication with
    *                          socket
    */
-  public CommunicationHandler(Socket clientSocket) throws IOException{
-      this.inputReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-      this.outputWriter = new PrintWriter(clientSocket.getOutputStream(), true);
+  public CommunicationHandler(Socket socket) throws IOException{
+      this.inputReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+      this.outputWriter = new PrintWriter(socket.getOutputStream(), true);
+      this.socket = socket;
   }
 
   /**
@@ -57,5 +59,9 @@ public class CommunicationHandler {
     } catch (IOException e) {
       System.err.println(e.getMessage());
     }
+  }
+
+  public Socket getSocket() {
+    return this.socket;
   }
 }

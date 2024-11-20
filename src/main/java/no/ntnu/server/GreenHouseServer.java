@@ -1,11 +1,14 @@
 package no.ntnu.server;
 
 import no.ntnu.tools.Logger;
+import no.ntnu.utils.CommunicationHandler;
 
-import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class GreenHouseServer extends Server {
+  private ArrayList<ControlPanelHandler> controlPanels;
+  private GreenHouseHandler greenhouse;
 
   public GreenHouseServer(int port) {
     super(port);
@@ -27,13 +30,38 @@ public class GreenHouseServer extends Server {
   }
 
   @Override
-  protected ControlPanelClientHandler getClientHandler(Socket socket) {
-    ControlPanelClientHandler result = null;
-//    try {
-//      result = new ControlPanelClientHandler(socket, this);
-//    } catch (IOException e) {
-//      Logger.error(e.getMessage());
-//    }
-    return result;
+  protected void socketConnected(Socket socket) {
+    // ControlPanelClientHandler result = null;
+    // try {
+    // result = new ControlPanelClientHandler(socket, this);
+    // } catch (IOException e) {
+    // Logger.error(e.getMessage());
+    // }
+
+    try {
+      CommunicationHandler newHandler = new CommunicationHandler(socket);
+
+      new Thread(() -> {
+        String initialMessage = newHandler.getMessage();
+
+        if (initialMessage.equals("Hello controlpanel")) {
+          ControlPanelHandler controlPanelHandler = new ControlPanelHandler(newHandler);
+
+          System.out.println("Controlpanel added");
+
+          this.controlPanels.add(controlPanelHandler);
+        } else if (initialMessage.equals("Hello greenhouse")) {
+          GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler);
+
+          
+          System.out.println("Greenhouse connected");
+          this.greenhouse = greenHouseHandler;
+          greenHouseHandler.start();
+          greenHouseHandler.stop();
+        }
+      }).start();
+    } catch (Exception e) {
+      System.out.println("Failed to create handler");
+    }
   }
 }
