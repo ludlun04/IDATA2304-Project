@@ -50,6 +50,7 @@ public class GreenHouseServer extends Server {
           System.out.println("Controlpanel added");
 
           this.controlPanels.add(controlPanelHandler);
+
         } else if (initialMessage.equals("Hello greenhouse")) {
           GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler);
 
@@ -57,7 +58,7 @@ public class GreenHouseServer extends Server {
           System.out.println("Greenhouse connected");
           this.greenhouse = greenHouseHandler;
           greenHouseHandler.start();
-          greenHouseHandler.stop();
+          this.greenhouse = null;
         }
       }).start();
     } catch (Exception e) {
