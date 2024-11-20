@@ -3,7 +3,7 @@ package no.ntnu.controlpanel;
 import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.SensorReading;
 import no.ntnu.tools.Logger;
-import no.ntnu.utils.CommunicationHandler;
+import no.ntnu.utils.MessageCommunicationHandler;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -12,10 +12,10 @@ import java.util.ArrayList;
 public class ControlPanelCommunicationHandler {
 
   private ControlPanelLogic logic;
-  private CommunicationHandler handler;
+  private MessageCommunicationHandler handler;
 
   public ControlPanelCommunicationHandler(Socket socket, ControlPanelLogic logic) throws IOException {
-    this.handler = new CommunicationHandler(socket);
+    this.handler = new MessageCommunicationHandler(socket);
     this.logic = logic;
   }
 

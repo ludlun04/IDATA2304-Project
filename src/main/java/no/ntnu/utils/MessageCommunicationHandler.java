@@ -9,7 +9,7 @@ import java.net.Socket;
 /**
  * Class for handling client
  */
-public class CommunicationHandler {
+public class MessageCommunicationHandler {
   protected BufferedReader inputReader;
   private final PrintWriter outputWriter;
 
@@ -20,7 +20,7 @@ public class CommunicationHandler {
    * @throws RuntimeException if constructor fails to open communication with
    *                          socket
    */
-  public CommunicationHandler(Socket clientSocket) throws IOException{
+  public MessageCommunicationHandler(Socket clientSocket) throws IOException{
       this.inputReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
       this.outputWriter = new PrintWriter(clientSocket.getOutputStream(), true);
   }

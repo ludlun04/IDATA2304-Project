@@ -8,21 +8,24 @@ import no.ntnu.greenhouse.Sensor;
 import no.ntnu.greenhouse.SensorActuatorNode;
 import java.util.List;
 import no.ntnu.tools.Logger;
-import no.ntnu.utils.CommunicationHandler;
+import no.ntnu.utils.BinaryCommunicationHandler;
+import no.ntnu.utils.MessageCommunicationHandler;
 
 public class ControlPanelClientHandler {
   private GreenhouseSimulator simulator;
-  private CommunicationHandler handler;
+  private MessageCommunicationHandler mHandler;
+  private BinaryCommunicationHandler bHandler;
 
   public ControlPanelClientHandler(Socket socket, GreenhouseSimulator simulator) throws
       IOException {
-    this.handler = new CommunicationHandler(socket);
+    this.mHandler = new MessageCommunicationHandler(socket);
+    this.bHandler = new BinaryCommunicationHandler(socket);
     this.simulator = simulator;
   }
 
   
   public void handleCommunication() {
-    String message = this.handler.getMessage();
+    String message = this.mHandler.getMessage();
     if (message != null) {
       System.out.println("ControlPanelClientHandler: " + message);
     }
@@ -53,6 +56,9 @@ public class ControlPanelClientHandler {
           case "close":
             closeConnection();
             break;
+          case "img":
+            sendImage();
+            break;
           default:
             Logger.error("Unknown command: " + args[0]);
             break;
@@ -61,7 +67,15 @@ public class ControlPanelClientHandler {
         Logger.error(e.getMessage());
       }
 
-      message = this.handler.getMessage();
+      message = this.mHandler.getMessage();
+    }
+  }
+
+  private void sendImage() {
+    try {
+      this.bHandler.readImageFromInputStream();
+    } catch (IOException e) {
+      Logger.error("Could not read image, " + e.getMessage());
     }
   }
 
@@ -101,7 +115,7 @@ public class ControlPanelClientHandler {
    */
   private void getNodeValues(String[] args) {
     for (Sensor sensor : this.simulator.getNode(Integer.parseInt(args[1])).getSensors()) {
-      this.handler.sendMessage("" + sensor.getReading().getValue());
+      this.mHandler.sendMessage("" + sensor.getReading().getValue());
     }
   }
 
@@ -127,7 +141,7 @@ public class ControlPanelClientHandler {
       response = String.format("%s %d %s", response, actuator.getId(), actuator.getType());
     }
 
-    this.handler.sendMessage(response);
+    this.mHandler.sendMessage(response);
   }
 
   /**
@@ -140,7 +154,7 @@ public class ControlPanelClientHandler {
           "updateActuatorInformation %d %d %b", nodeID,
           actuator.getId(),
           actuator.isOn());
-      this.handler.sendMessage(response);
+      this.mHandler.sendMessage(response);
     });
   }
 
@@ -155,11 +169,11 @@ public class ControlPanelClientHandler {
             response = String.format("%s %s %f %s",response, sensor.getType(),
                 sensor.getReading().getValue(), sensor.getReading().getUnit());
         }
-        this.handler.sendMessage(response);
+        this.mHandler.sendMessage(response);
     });
   }
 
   private void closeConnection() {
-    this.handler.close();
+    this.mHandler.close();
   }
 }
