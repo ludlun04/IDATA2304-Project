@@ -3,7 +3,7 @@ package no.ntnu.server;
 import java.net.Socket;
 import no.ntnu.greenhouse.GreenhouseNode;
 
-public class NodeClientHandler extends ClientHandler {
+public class NodeClientHandler {
 
   public NodeClientHandler(Socket socket) {
     super(socket);
