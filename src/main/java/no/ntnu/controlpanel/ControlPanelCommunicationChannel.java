@@ -37,11 +37,13 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     }).start();
 
     String expectedResponse = "Hello from server";
-    String response = "";
+    String response = null;
 
     while (!expectedResponse.equals(response)) {
       response = this.handler.getMessage();
     }
+
+    this.handShakeCompleted = true;
   }
 
   @Override
@@ -84,8 +86,6 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     try {
       createHandler();
 
-      performHandshake();
-
       new Thread(() -> {
 
         while (this.stayConnected) {
@@ -112,6 +112,8 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
   private void createHandler() throws IOException {
     this.handler = new ControlPanelCommunicationHandler(
         new Socket("127.0.0.1", 8765), this.logic);
+
+    performHandshake();
   }
 
   private boolean attemptReconnect() {

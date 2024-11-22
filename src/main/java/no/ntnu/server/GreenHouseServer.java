@@ -63,11 +63,14 @@ public class GreenHouseServer extends Server {
             ControlPanelHandler controlPanelHandler = new ControlPanelHandler(newHandler, this);
             Logger.info("Controlpanel added");
             this.controlPanels.add(controlPanelHandler);
+            newHandler.sendMessage("Hello from server");
             controlPanelHandler.start();
+            this.controlPanels.remove(controlPanelHandler);
             break;
           case "I am greenhouse":
             GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler, this);
             Logger.info("Greenhouse connected");
+            newHandler.sendMessage("initialData");
             this.greenhouse = greenHouseHandler;
             greenHouseHandler.start();
             this.greenhouse = null;
