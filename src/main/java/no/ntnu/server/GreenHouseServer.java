@@ -29,6 +29,17 @@ public class GreenHouseServer extends Server {
     // TODO: fix
   }
 
+  public void sendToAllClients(String message) {
+    
+  }
+
+  public void sendToGreenhouse(String message) {
+    if (this.greenhouse != null) {
+      this.greenhouse.SendMessage(message);
+    }
+  }
+
+
   @Override
   protected void socketConnected(Socket socket) {
     // ControlPanelClientHandler result = null;
@@ -38,31 +49,32 @@ public class GreenHouseServer extends Server {
     // Logger.error(e.getMessage());
     // }
 
-    try {
-      CommunicationHandler newHandler = new CommunicationHandler(socket);
+    new Thread(() -> {
+      try {
+        CommunicationHandler newHandler = new CommunicationHandler(socket);
 
-      new Thread(() -> {
         String initialMessage = newHandler.getMessage();
 
         if (initialMessage.equals("Hello controlpanel")) {
-          ControlPanelHandler controlPanelHandler = new ControlPanelHandler(newHandler);
+          ControlPanelHandler controlPanelHandler = new ControlPanelHandler(newHandler, this);
 
           System.out.println("Controlpanel added");
+
+          controlPanelHandler.start();
 
           this.controlPanels.add(controlPanelHandler);
 
         } else if (initialMessage.equals("Hello greenhouse")) {
-          GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler);
+          GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler, this);
 
-          
           System.out.println("Greenhouse connected");
           this.greenhouse = greenHouseHandler;
           greenHouseHandler.start();
           this.greenhouse = null;
         }
-      }).start();
-    } catch (Exception e) {
-      System.out.println("Failed to create handler");
-    }
+      } catch (Exception e) {
+        System.out.println("Failed to create handler");
+      }
+    }).start();
   }
 }

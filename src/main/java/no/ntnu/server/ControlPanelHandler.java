@@ -5,11 +5,16 @@ import no.ntnu.utils.CommunicationHandler;
 public class ControlPanelHandler {
 
   private CommunicationHandler communicationHandler;
+  private GreenHouseServer server;
   private boolean isConnected;
 
-  public ControlPanelHandler(CommunicationHandler handler) {
+  public ControlPanelHandler(CommunicationHandler handler, GreenHouseServer server) {
     this.communicationHandler = handler;
-    
+    this.server = server;
+  }
+
+  public void sendMessage(String message) {
+    this.communicationHandler.sendMessage(message);
   }
 
   public void start() {
@@ -19,16 +24,10 @@ public class ControlPanelHandler {
 
         if (message == null) {
             this.isConnected = false;
+        } else {
+          this.server.sendToGreenhouse(message);
         }
 
-        switch (message) {
-          case "set":
-            System.out.println("");
-            break;
-        
-          default:
-            break;
-        }
     }
   }
 
