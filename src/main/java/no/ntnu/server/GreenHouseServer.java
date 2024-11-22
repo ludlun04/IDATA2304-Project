@@ -31,7 +31,9 @@ public class GreenHouseServer extends Server {
   }
 
   public void sendToAllClients(String message) {
-    
+    for (ControlPanelHandler controlPanelHandler : this.controlPanels) {
+      controlPanelHandler.sendMessage(message);
+    }
   }
 
   public void sendToGreenhouse(String message) {
