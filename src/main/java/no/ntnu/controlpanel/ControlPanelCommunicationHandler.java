@@ -27,6 +27,10 @@ public class ControlPanelCommunicationHandler {
     this.handler.sendMessage(message);
   }
 
+  public String getMessage() {
+    return this.handler.getMessage();
+  }
+
   public void handleCommunication() throws IOException {
       String message = this.handler.getMessage();
 

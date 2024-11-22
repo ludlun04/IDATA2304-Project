@@ -2,6 +2,7 @@ package no.ntnu.greenhouse;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +12,7 @@ import no.ntnu.listeners.greenhouse.NodeStateListener;
 import no.ntnu.server.ControlPanelClientHandler;
 import no.ntnu.server.Server;
 import no.ntnu.tools.Logger;
+import no.ntnu.utils.CommunicationHandler;
 
 /**
  * Application entrypoint - a simulator for a greenhouse.
@@ -73,7 +75,12 @@ public class GreenhouseSimulator {
 
   private void initiateRealCommunication() {
     // TODO - here you can set up the TCP or UDP communication
-
+    try(Socket socket = new Socket("127.0.0.1", 8765)) {
+      CommunicationHandler handler = new CommunicationHandler(socket);
+      handler.sendMessage("I am greenhouse");
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private void initiateFakePeriodicSwitches() {
@@ -119,6 +126,5 @@ public class GreenhouseSimulator {
   public List<SensorActuatorNode> getNodes() {
     return nodes.values().stream().toList();
   }
-
 
 }

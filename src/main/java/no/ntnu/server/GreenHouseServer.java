@@ -12,6 +12,7 @@ public class GreenHouseServer extends Server {
 
   public GreenHouseServer(int port) {
     super(port);
+    this.controlPanels = new ArrayList<>();
   }
 
   public void start() {
@@ -55,26 +56,35 @@ public class GreenHouseServer extends Server {
 
         String initialMessage = newHandler.getMessage();
 
-        if (initialMessage.equals("Hello controlpanel")) {
-          ControlPanelHandler controlPanelHandler = new ControlPanelHandler(newHandler, this);
-
-          System.out.println("Controlpanel added");
-
-          controlPanelHandler.start();
-
-          this.controlPanels.add(controlPanelHandler);
-
-        } else if (initialMessage.equals("Hello greenhouse")) {
-          GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler, this);
-
-          System.out.println("Greenhouse connected");
-          this.greenhouse = greenHouseHandler;
-          greenHouseHandler.start();
-          this.greenhouse = null;
+        switch (initialMessage) {
+          case "I am controlpanel":
+            ControlPanelHandler controlPanelHandler = new ControlPanelHandler(newHandler, this);
+            Logger.info("Controlpanel added");
+            this.controlPanels.add(controlPanelHandler);
+            controlPanelHandler.start();
+            break;
+          case "I am greenhouse":
+            GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler, this);
+            Logger.info("Greenhouse connected");
+            this.greenhouse = greenHouseHandler;
+            greenHouseHandler.start();
+            this.greenhouse = null;
+            break;
+          default:
+            Logger.error("Unsupported node: " + initialMessage);
         }
+        socket.close();
       } catch (Exception e) {
-        System.out.println("Failed to create handler");
+        Logger.error("Failed to create handler");
       }
+
     }).start();
+  }
+
+  public static void main(String[] args) {
+    GreenHouseServer server = new GreenHouseServer(8765);
+    server.start();
+
+
   }
 }

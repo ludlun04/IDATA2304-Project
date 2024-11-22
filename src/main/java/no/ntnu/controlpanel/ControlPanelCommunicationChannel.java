@@ -8,8 +8,9 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
   private static final int RECONNECT_ATTEMPTS = 5;
   private static final int RECONNECT_ATTEMPT_WAIT_MILLIS = 5000;
+  private static final int PING_WAIT_MILLIS = 1000;
 
-
+  private boolean handShakeCompleted;
   private boolean stayConnected;
   private ControlPanelCommunicationHandler handler;
   private ControlPanelLogic logic;
@@ -19,10 +20,28 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
       throw new IllegalArgumentException("logic cannot be null");
     }
     this.logic = logic;
+    this.handShakeCompleted = false;
   }
 
-  public void sendInitialDataRequest() {
-    this.handler.sendMessage("initialData");
+  public void performHandshake() {
+
+    new Thread(() -> {
+      while (!handShakeCompleted) {
+        this.handler.sendMessage("I am controlpanel");
+        try {
+          Thread.sleep(PING_WAIT_MILLIS);
+        } catch (InterruptedException e) {
+          Logger.error("Could not sleep during ping");
+        }
+      }
+    }).start();
+
+    String expectedResponse = "Hello from server";
+    String response = "";
+
+    while (!expectedResponse.equals(response)) {
+      response = this.handler.getMessage();
+    }
   }
 
   @Override
@@ -65,7 +84,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     try {
       createHandler();
 
-      sendInitialDataRequest();
+      performHandshake();
 
       new Thread(() -> {
 
