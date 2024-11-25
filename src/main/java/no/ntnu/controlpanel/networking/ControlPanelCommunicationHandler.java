@@ -1,5 +1,7 @@
-package no.ntnu.controlpanel;
+package no.ntnu.controlpanel.networking;
 
+import no.ntnu.controlpanel.ControlPanelLogic;
+import no.ntnu.controlpanel.SensorActuatorNodeInfo;
 import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.SensorReading;
 import no.ntnu.tools.Logger;

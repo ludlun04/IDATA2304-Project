@@ -2,15 +2,12 @@ package no.ntnu.greenhouse;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import no.ntnu.listeners.greenhouse.NodeStateListener;
-import no.ntnu.server.ControlPanelClientHandler;
-import no.ntnu.server.Server;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
 

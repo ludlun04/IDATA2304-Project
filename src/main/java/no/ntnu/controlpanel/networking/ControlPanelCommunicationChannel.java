@@ -1,7 +1,10 @@
-package no.ntnu.controlpanel;
+package no.ntnu.controlpanel.networking;
 
 import java.io.IOException;
 import java.net.Socket;
+
+import no.ntnu.controlpanel.CommunicationChannel;
+import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.tools.Logger;
 
 public class ControlPanelCommunicationChannel implements CommunicationChannel {
@@ -114,6 +117,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
         new Socket("127.0.0.1", 8765), this.logic);
 
     performHandshake();
+
   }
 
   private boolean attemptReconnect() {

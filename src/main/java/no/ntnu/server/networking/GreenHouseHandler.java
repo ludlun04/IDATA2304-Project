@@ -1,5 +1,6 @@
-package no.ntnu.server;
+package no.ntnu.server.networking;
 
+import no.ntnu.server.GreenHouseServer;
 import no.ntnu.utils.CommunicationHandler;
 
 public class GreenHouseHandler {

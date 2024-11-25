@@ -1,5 +1,7 @@
 package no.ntnu.server;
 
+import no.ntnu.server.networking.ControlPanelHandler;
+import no.ntnu.server.networking.GreenHouseHandler;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
 
