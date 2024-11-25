@@ -47,7 +47,6 @@ public class ControlPanelCommunicationHandler {
 
       switch (command) {
         case "add" -> {
-
           SensorActuatorNodeInfo sensorActuatorNodeInfo =
               new SensorActuatorNodeInfo(nodeId);
 

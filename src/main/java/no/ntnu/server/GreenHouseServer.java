@@ -73,6 +73,7 @@ public class GreenHouseServer extends Server {
             controlPanelHandler.start();
             this.controlPanels.remove(controlPanelHandler);
             break;
+
           case "I am greenhouse":
             GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler, this);
             Logger.info("Greenhouse connected");
@@ -81,6 +82,7 @@ public class GreenHouseServer extends Server {
             greenHouseHandler.start();
             this.greenhouse = null;
             break;
+
           default:
             Logger.error("Unsupported node: " + initialMessage);
         }
@@ -95,7 +97,5 @@ public class GreenHouseServer extends Server {
   public static void main(String[] args) {
     GreenHouseServer server = new GreenHouseServer(8765);
     server.start();
-
-
   }
 }
