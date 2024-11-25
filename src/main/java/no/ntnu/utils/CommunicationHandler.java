@@ -20,9 +20,9 @@ public abstract class CommunicationHandler {
    * @throws RuntimeException if constructor fails to open communication with
    *                          socket
    */
-  public CommunicationHandler(Socket clientSocket) throws IOException{
-      this.inputReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-      this.outputWriter = new PrintWriter(clientSocket.getOutputStream(), true);
+  public CommunicationHandler(Socket clientSocket) throws IOException {
+    this.inputReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+    this.outputWriter = new PrintWriter(clientSocket.getOutputStream(), true);
   }
 
   /**
@@ -33,6 +33,7 @@ public abstract class CommunicationHandler {
   public void sendMessage(String message) {
     this.outputWriter.println(message);
   }
+
 
   /**
    * Waits for a message from the client

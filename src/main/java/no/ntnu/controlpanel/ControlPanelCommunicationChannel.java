@@ -2,33 +2,20 @@ package no.ntnu.controlpanel;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.List;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.SensorReading;
 import no.ntnu.tools.Logger;
-import no.ntnu.utils.CipherKeyGenerator;
 import no.ntnu.utils.CommunicationHandler;
 
 public class ControlPanelCommunicationChannel extends CommunicationHandler
     implements CommunicationChannel {
   private final ControlPanelLogic logic;
-  private final CipherKeyGenerator cipherKeyGenerator;
-  private final PublicKey publicKey;
-  private final PrivateKey privateKey;
   private SecretKey aesKey;
-  private List<byte[]> publicKeyPartsBuffer = new ArrayList<>();
 
   public ControlPanelCommunicationChannel(ControlPanelLogic logic) throws IOException {
     super(new Socket("127.0.0.1", 8765));
@@ -36,9 +23,6 @@ public class ControlPanelCommunicationChannel extends CommunicationHandler
       throw new IllegalArgumentException("logic cannot be null");
     }
     this.logic = logic;
-    this.cipherKeyGenerator = new CipherKeyGenerator();
-    this.publicKey = cipherKeyGenerator.getPublicKey();
-    this.privateKey = cipherKeyGenerator.getPrivateKey();
   }
 
   public void sendInitialDataRequest() {
@@ -77,49 +61,10 @@ public class ControlPanelCommunicationChannel extends CommunicationHandler
     this.sendEncryptedMessageAES(String.format("add actuator %d %s", nodeId, actuatorType));
   }
 
-  public void sendPublicKeyInParts(PublicKey publicKey) {
-    try {
-      byte[] publicKeyBytes = this.publicKey.getEncoded();
-      int partSize = 200;
-      for (int i = 0; i < publicKeyBytes.length; i += partSize) {
-        int end = Math.min(publicKeyBytes.length, i + partSize);
-        byte[] part = Arrays.copyOfRange(publicKeyBytes, i, end);
-        String encodedPart = Base64.getEncoder().encodeToString(part);
-        super.sendMessage(encryptMessageRSA(encodedPart, publicKey));
-      }
-      super.sendMessage(encryptMessageRSA("publicKeyEnd", publicKey));
-    } catch (Exception e) {
-      Logger.error("Error sending public key in parts: " + e.getMessage());
-    }
-  }
-
-  public PublicKey handlePublicKeyParts() {
-    StringBuilder message = new StringBuilder();
-    String currentMessage = super.getMessage();
-    while (!currentMessage.equals("publicKeyEnd")) {
-      message.append(currentMessage);
-      currentMessage = super.getMessage();
-      Logger.info(currentMessage);
-    }
-    String[] args = message.toString().split(" ");
-
-    PublicKey publicKey = null;
-    try {
-      byte[] publicKeyBytes = Base64.getDecoder().decode(args[0]);
-      X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
-      KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-      publicKey = keyFactory.generatePublic(keySpec);
-    } catch (Exception e) {
-      Logger.error("Error handling public key parts: " + e.getMessage());
-    }
-    return publicKey;
-  }
-
   @Override
   public boolean open() {
     boolean connected = false;
     Logger.info("Connecting to socket");
-    publicKeyExchange();
     receivingAESKey();
     sendInitialDataRequest();
 
@@ -133,16 +78,12 @@ public class ControlPanelCommunicationChannel extends CommunicationHandler
   }
 
   private void receivingAESKey() {
-    String message = decryptMessageRSA(super.getMessage());
+    String message = super.getMessage();
     String[] args = message.split(" ");
     if (args[0].equals("aesKey")) {
       byte[] aesKeyBytes = Base64.getDecoder().decode(args[1]);
       this.aesKey = new SecretKeySpec(aesKeyBytes, "AES");
     }
-  }
-
-  private void publicKeyExchange() {
-    sendPublicKeyInParts(handlePublicKeyParts());
   }
 
   public void handleCommunication() {
@@ -204,20 +145,6 @@ public class ControlPanelCommunicationChannel extends CommunicationHandler
     //TODO: Implement close
   }
 
-  public String encryptMessageRSA(String message, PublicKey publicKey) {
-    String result = null;
-    try {
-      Cipher cipher = Cipher.getInstance("RSA");
-      cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-      byte[] encryptedMessage = cipher.doFinal(message.getBytes());
-      result = Base64.getEncoder().encodeToString(encryptedMessage);
-    } catch (Exception e) {
-      Logger.error("RSA encryption: " + e.getMessage());
-      Logger.error("Data size is: " + message.getBytes().length + " message is \n" + message);
-    }
-    return result;
-  }
-
   public String encryptMessageAES(String message) {
     String result = null;
     try {
@@ -227,19 +154,6 @@ public class ControlPanelCommunicationChannel extends CommunicationHandler
       result = Base64.getEncoder().encodeToString(encryptedMessage);
     } catch (Exception e) {
       Logger.error("AES encryption: " + e.getMessage());
-    }
-    return result;
-  }
-
-  public String decryptMessageRSA(String encryptedMessage) {
-    String result = null;
-    try {
-      Cipher cipher = Cipher.getInstance("RSA");
-      cipher.init(Cipher.DECRYPT_MODE, this.privateKey);
-      byte[] decryptedMessage = cipher.doFinal(Base64.getDecoder().decode(encryptedMessage));
-      result = new String(decryptedMessage);
-    } catch (Exception e) {
-      Logger.error("RSA decryption: " + e.getMessage());
     }
     return result;
   }

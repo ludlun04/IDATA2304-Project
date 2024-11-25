@@ -2,14 +2,6 @@ package no.ntnu.server;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import javax.crypto.Cipher;
@@ -24,10 +16,7 @@ import no.ntnu.utils.CommunicationHandler;
 
 public class ControlPanelClientHandler extends CommunicationHandler {
   private GreenhouseSimulator simulator;
-  private List<byte[]> publicKeyPartsBuffer = new ArrayList<>();
   private final CipherKeyGenerator cipherKeyGenerator;
-  private final PublicKey publicKey;
-  private final PrivateKey privateKey;
   private final SecretKey aesKey;
 
   public ControlPanelClientHandler(Socket socket, GreenhouseSimulator simulator) throws
@@ -35,8 +24,6 @@ public class ControlPanelClientHandler extends CommunicationHandler {
     super(socket);
     this.simulator = simulator;
     this.cipherKeyGenerator = new CipherKeyGenerator();
-    this.publicKey = cipherKeyGenerator.getPublicKey();
-    this.privateKey = cipherKeyGenerator.getPrivateKey();
     this.aesKey = cipherKeyGenerator.getAESKey();
   }
 
@@ -45,14 +32,12 @@ public class ControlPanelClientHandler extends CommunicationHandler {
    * Getting the public key from the client and sending the AES key.
    */
   public void createCipherCommunication() {
-    sendPublicKey();
-    Logger.info("Public key sent");
-    sendAESKey(handlePublicKeyParts());
+    sendAESKey();
   }
 
   @Override
   public void handleCommunication() {
-    String message = super.getMessage();
+    String message = decryptMessageAES(super.getMessage());
     if (message != null) {
       System.out.println("ControlPanelClientHandler: " + message);
     }
@@ -91,7 +76,7 @@ public class ControlPanelClientHandler extends CommunicationHandler {
         Logger.error(e.getMessage());
       }
 
-      message = super.getMessage();
+      message = decryptMessageAES(super.getMessage());
     }
   }
 
@@ -203,57 +188,15 @@ public class ControlPanelClientHandler extends CommunicationHandler {
     super.close();
   }
 
-  /**
-   * Send the public key to the client
-   */
-  public void sendPublicKey() {
-    try {
-      byte[] publicKeyBytes = publicKey.getEncoded();
-      int partSize = 200; // Ensure part size is within RSA encryption limit
-      for (int i = 0; i < publicKeyBytes.length; i += partSize) {
-        int end = Math.min(publicKeyBytes.length, i + partSize);
-        byte[] part = Arrays.copyOfRange(publicKeyBytes, i, end);
-        String encodedPart = Base64.getEncoder().encodeToString(part);
-        super.sendMessage(encodedPart);
-        Logger.info("Public key part sent");
-      }
-      super.sendMessage("publicKeyEnd");
-    } catch (Exception e) {
-      Logger.error("Error sending public key in parts: " + e.getMessage());
-    }
-  }
-
-  public PublicKey handlePublicKeyParts() {
-    StringBuilder message = new StringBuilder();
-    String currentMessage = decryptMessageRSA(super.getMessage());
-    while (!currentMessage.equals("publicKeyEnd")) {
-      message.append(currentMessage);
-      currentMessage = decryptMessageRSA(super.getMessage());
-      Logger.info("Current message: " + currentMessage);
-    }
-    String[] args = message.toString().split(" ");
-
-    PublicKey publicKey = null;
-    try {
-      byte[] publicKeyBytes = Base64.getDecoder().decode(args[0]);
-      X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
-      KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-      publicKey = keyFactory.generatePublic(keySpec);
-    } catch (Exception e) {
-      Logger.error("Error handling public key parts: " + e.getMessage());
-    }
-    return publicKey;
-  }
 
   /**
    * Send the AES key to the client
-   *
-   * @param clientPublicKey The public key of the client
    */
-  public void sendAESKey(PublicKey clientPublicKey) {
+  public void sendAESKey() {
     try {
-      super.sendMessage(encryptMessageRSA("aesKey " + this.aesKey, clientPublicKey));
-      Logger.info("AES key sent");
+      String encodedKey = Base64.getEncoder().encodeToString(this.aesKey.getEncoded());
+      super.sendMessage("aesKey " + encodedKey);
+      Logger.info("AES key sent" + this.aesKey.getEncoded());
     } catch (Exception e) {
       Logger.error(e.getMessage());
     }
@@ -279,25 +222,6 @@ public class ControlPanelClientHandler extends CommunicationHandler {
   }
 
   /**
-   * Encrypt a message with RSA
-   *
-   * @param message The message to encrypt
-   * @return The encrypted message
-   */
-  private String encryptMessageRSA(String message, PublicKey publicKey) {
-    String result = null;
-    try {
-      Cipher cipher = Cipher.getInstance("RSA");
-      cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-      byte[] encryptedMessage = cipher.doFinal(message.getBytes());
-      result = Base64.getEncoder().encodeToString(encryptedMessage);
-    } catch (Exception e) {
-      Logger.error(e.getMessage());
-    }
-    return result;
-  }
-
-  /**
    * Decrypt a message with AES
    *
    * @param encryptedMessage The message to decrypt
@@ -308,23 +232,6 @@ public class ControlPanelClientHandler extends CommunicationHandler {
     try {
       Cipher cipher = Cipher.getInstance("AES");
       cipher.init(Cipher.DECRYPT_MODE, this.aesKey);
-      byte[] decodedMessage = Base64.getDecoder().decode(encryptedMessage);
-      byte[] decryptedMessage = cipher.doFinal(decodedMessage);
-      result = new String(decryptedMessage);
-    } catch (Exception e) {
-      Logger.error(e.getMessage());
-    }
-    return result;
-  }
-
-  /**
-   * Decrypt a message with RSA
-   */
-  private String decryptMessageRSA(String encryptedMessage) {
-    String result = null;
-    try {
-      Cipher cipher = Cipher.getInstance("RSA");
-      cipher.init(Cipher.DECRYPT_MODE, this.privateKey);
       byte[] decodedMessage = Base64.getDecoder().decode(encryptedMessage);
       byte[] decryptedMessage = cipher.doFinal(decodedMessage);
       result = new String(decryptedMessage);
