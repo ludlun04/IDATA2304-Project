@@ -203,10 +203,10 @@ public class ControlPanelClientHandler extends CommunicationHandler {
   }
 
   /**
-   * Encrypt a message with AES
+   * Encrypts a message using AES encryption
    *
-   * @param message The message to encrypt
-   * @return The encrypted message
+   * @param message message to encrypt
+   * @return encrypted message
    */
   private String encryptMessageAES(String message) {
     String result = null;
@@ -222,10 +222,10 @@ public class ControlPanelClientHandler extends CommunicationHandler {
   }
 
   /**
-   * Decrypt a message with AES
+   * Decrypts a message using AES encryption
    *
-   * @param encryptedMessage The message to decrypt
-   * @return The decrypted message
+   * @param encryptedMessage message to decrypt
+   * @return decrypted message
    */
   private String decryptMessageAES(String encryptedMessage) {
     String result = null;

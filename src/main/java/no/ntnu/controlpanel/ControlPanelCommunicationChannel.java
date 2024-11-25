@@ -77,6 +77,9 @@ public class ControlPanelCommunicationChannel extends CommunicationHandler
     return connected;
   }
 
+  /**
+   * Receives the AES key from the server
+   */
   private void receivingAESKey() {
     String message = super.getMessage();
     String[] args = message.split(" ");
@@ -86,6 +89,7 @@ public class ControlPanelCommunicationChannel extends CommunicationHandler
     }
   }
 
+  @Override
   public void handleCommunication() {
     try {
       String message = decryptMessageAES(super.getMessage());
@@ -145,6 +149,12 @@ public class ControlPanelCommunicationChannel extends CommunicationHandler
     //TODO: Implement close
   }
 
+  /**
+   * Encrypts a message using AES encryption
+   *
+   * @param message message to encrypt
+   * @return encrypted message
+   */
   public String encryptMessageAES(String message) {
     String result = null;
     try {
@@ -158,6 +168,12 @@ public class ControlPanelCommunicationChannel extends CommunicationHandler
     return result;
   }
 
+  /**
+   * Decrypts a message using AES encryption
+   *
+   * @param encryptedMessage message to decrypt
+   * @return decrypted message
+   */
   public String decryptMessageAES(String encryptedMessage) {
     String result = null;
     try {
