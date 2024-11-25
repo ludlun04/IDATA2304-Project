@@ -241,6 +241,11 @@ public class ControlPanelClientHandler extends CommunicationHandler {
     return result;
   }
 
+  /**
+   * Sends an encrypted message to the server
+   *
+   * @param message message to send
+   */
   public void sendEncryptedMessageAES(String message) {
     super.sendMessage(encryptMessageAES(message));
   }
