@@ -13,7 +13,7 @@ public class GreenHouseHandler {
         this.server = server;
     }
 
-    public void SendMessage(String message) {
+    public void sendMessage(String message) {
       this.communicationHandler.sendMessage(message);
     }
 

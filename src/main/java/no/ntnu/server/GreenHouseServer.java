@@ -40,10 +40,9 @@ public class GreenHouseServer extends Server {
 
   public void sendToGreenhouse(String message) {
     if (this.greenhouse != null) {
-      this.greenhouse.SendMessage(message);
+      this.greenhouse.sendMessage(message);
     }
   }
-
 
   @Override
   protected void socketConnected(Socket socket) {
@@ -66,6 +65,11 @@ public class GreenHouseServer extends Server {
             Logger.info("Controlpanel added");
             this.controlPanels.add(controlPanelHandler);
             newHandler.sendMessage("Hello from server");
+
+            if (this.greenhouse != null) {
+              this.greenhouse.sendMessage("initialData");
+            }
+
             controlPanelHandler.start();
             this.controlPanels.remove(controlPanelHandler);
             break;
