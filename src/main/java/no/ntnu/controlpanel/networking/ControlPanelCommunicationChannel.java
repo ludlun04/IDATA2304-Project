@@ -9,7 +9,7 @@ import no.ntnu.tools.Logger;
 
 public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
-  private static final int RECONNECT_ATTEMPTS = 5;
+  private static final int RECONNECT_ATTEMPTS = -1;
   private static final int RECONNECT_ATTEMPT_WAIT_MILLIS = 5000;
   private static final int PING_WAIT_MILLIS = 1000;
 
@@ -82,34 +82,28 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
   @Override
   public boolean open() {
-    boolean connected;
     this.stayConnected = true;
     Logger.info("Connecting to socket");
-
-    try {
-      createHandler();
 
       new Thread(() -> {
 
         while (this.stayConnected) {
           try {
             this.handler.handleCommunication();
-          } catch (IOException ioException) {
-            if (!attemptReconnect()) {
+          } catch (IOException | NullPointerException exception ) {
+            stayConnected = attemptReconnect();
+            if (!stayConnected) {
               Logger.info("Could not connect, stopping communication channel.");
               this.stayConnected = false;
               this.logic.onCommunicationChannelClosed();
+
             }
           }
 
         }
       }).start();
 
-      connected = true;
-    } catch (IOException e) {
-      connected = false;
-    }
-    return connected;
+    return stayConnected;
   }
 
   private void createHandler() throws IOException {
@@ -125,7 +119,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
     boolean result = false;
 
-    while (tries > 0 && !result) {
+    while (tries != 0 && !result) {
 
       try {
         createHandler();
@@ -133,7 +127,9 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
       } catch (IOException ioException) {
         Logger.info("Attempting to reconnect, " + tries + " tries left...");
         wait(RECONNECT_ATTEMPT_WAIT_MILLIS);
-        tries--;
+        if (tries > 0) {
+            tries--;
+        }
       }
 
     }

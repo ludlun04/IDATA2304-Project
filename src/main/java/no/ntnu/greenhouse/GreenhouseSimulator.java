@@ -75,6 +75,7 @@ public class GreenhouseSimulator {
     // TODO - here you can set up the TCP or UDP communication
     new Thread(() -> {
       try (Socket socket = new Socket("127.0.0.1", 8765)) {
+        System.out.println("WE MADE A SOCKET!!!!!!");
         CommunicationHandler handler = new CommunicationHandler(socket);
         this.handler = handler;
         handler.sendMessage("I am greenhouse");
