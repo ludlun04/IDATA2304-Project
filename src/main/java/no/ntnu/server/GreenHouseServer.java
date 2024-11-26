@@ -67,7 +67,7 @@ public class GreenHouseServer extends Server {
             newHandler.sendMessage("Hello from server");
 
             if (this.greenhouse != null) {
-              this.greenhouse.sendMessage("initialData");
+              this.greenhouse.sendMessage("setupNodes");
             }
 
             controlPanelHandler.start();
@@ -77,7 +77,8 @@ public class GreenHouseServer extends Server {
           case "I am greenhouse":
             GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler, this);
             Logger.info("Greenhouse connected");
-            newHandler.sendMessage("initialData");
+            newHandler.sendMessage("setupNodes");
+            newHandler.sendMessage("startDataTransfer");
             this.greenhouse = greenHouseHandler;
             greenHouseHandler.start();
             this.greenhouse = null;

@@ -45,6 +45,7 @@ public class ControlPanelCommunicationHandler {
       String command = args[0];
       int nodeId = Integer.parseInt(args[1]);
 
+    try {
       switch (command) {
         case "add" -> {
           SensorActuatorNodeInfo sensorActuatorNodeInfo =
@@ -63,6 +64,7 @@ public class ControlPanelCommunicationHandler {
         }
         case "remove" -> this.logic.onNodeRemoved(nodeId);
         case "updateSensorsInformation" -> {
+          System.out.println(message);
           ArrayList<SensorReading> readings = new ArrayList<>();
 
           for (int i = 2; i < args.length; i += 3) {
@@ -75,7 +77,6 @@ public class ControlPanelCommunicationHandler {
 
             readings.add(sensorReading);
           }
-
           this.logic.onSensorData(nodeId, readings);
         }
         case "updateActuatorInformation" -> {
@@ -86,7 +87,11 @@ public class ControlPanelCommunicationHandler {
         }
         default -> Logger.info("Unknown command: " + command);
       }
-
+    } catch (NumberFormatException e) {
+      Logger.error("Failed to parse message: " + message + ", " + e.getMessage());
+    } catch (IndexOutOfBoundsException e) {
+      Logger.error("Missing parameters in message: " + message + ", " + e.getMessage());
     }
+  }
   }
 

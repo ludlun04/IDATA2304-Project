@@ -104,8 +104,11 @@ public class GreenhouseSimulator {
     boolean shouldClose = fake;
     try {
       switch (args[0]) {
-        case "initialData":
-          sendInitialData();
+        case "setupNodes":
+          setupNodes();
+          break;
+        case "startDataTransfer":
+          startDataTransfer();
           break;
         case "get":
           getNodeValues(args);
@@ -181,12 +184,14 @@ public class GreenhouseSimulator {
     }
   }
 
-  /**
-   * Send initial data to client
-   */
-  public void sendInitialData() {
+  public void setupNodes() {
     for (SensorActuatorNode node : this.getNodes()) {
       sendNodeInformation(node);
+    }
+  }
+
+  public void startDataTransfer() {
+    for (SensorActuatorNode node : this.getNodes()) {
       initializeActuatorListeners(node);
       initializeSensorListeners(node);
     }
