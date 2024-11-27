@@ -15,8 +15,9 @@ public class CipherKeyHandler {
     generateAESKey();
   }
 
-  public CipherKeyHandler(byte[] aesKey) {
-    this.aesKey = new SecretKeySpec(aesKey, "AES");
+  public CipherKeyHandler(String aesKey) {
+    byte[] decodedKey = Base64.getDecoder().decode(aesKey);
+    this.aesKey = new SecretKeySpec(decodedKey, "AES");
   }
 
 
@@ -33,6 +34,15 @@ public class CipherKeyHandler {
 
   public SecretKey getAESKey() {
     return this.aesKey;
+  }
+
+  public String getAESKeyAsString() {
+    return Base64.getEncoder().encodeToString(this.aesKey.getEncoded());
+  }
+
+  public void setAESKey(String aesKey) {
+    byte[] decodedKey = Base64.getDecoder().decode(aesKey);
+    this.aesKey = new SecretKeySpec(decodedKey, "AES");
   }
 
   public String encryptMessageAES(String message) {
