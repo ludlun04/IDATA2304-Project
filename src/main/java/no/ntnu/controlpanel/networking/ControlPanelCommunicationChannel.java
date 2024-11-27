@@ -9,9 +9,11 @@ import no.ntnu.tools.Logger;
 
 public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
+  // less than zero means infinite attempts
   private static final int RECONNECT_ATTEMPTS = -1;
+
   private static final int RECONNECT_ATTEMPT_WAIT_MILLIS = 5000;
-  private static final int PING_WAIT_MILLIS = 1000;
+  private static final int HANDSHAKE_WAIT_MILLIS = 1000;
 
   private boolean handShakeCompleted;
   private boolean stayConnected;
@@ -28,11 +30,12 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
   public void performHandshake() {
 
+    this.handShakeCompleted = false;
     new Thread(() -> {
       while (!handShakeCompleted) {
         this.handler.sendMessage("I am controlpanel");
         try {
-          Thread.sleep(PING_WAIT_MILLIS);
+          Thread.sleep(HANDSHAKE_WAIT_MILLIS);
         } catch (InterruptedException e) {
           Logger.error("Could not sleep during ping");
         }
@@ -124,9 +127,16 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
       try {
         createHandler();
         result = true;
+        Logger.info("Successfully connected to server");
       } catch (IOException ioException) {
-        Logger.info("Attempting to reconnect, " + tries + " tries left...");
+
+        if (RECONNECT_ATTEMPTS < 0) {
+          Logger.info("Attempting to connect...");
+        } else {
+          Logger.info("Attempting to connect, " + tries + " tries left...");
+        }
         wait(RECONNECT_ATTEMPT_WAIT_MILLIS);
+
         if (tries > 0) {
             tries--;
         }
