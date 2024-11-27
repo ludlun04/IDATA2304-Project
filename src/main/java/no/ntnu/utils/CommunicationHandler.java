@@ -15,7 +15,6 @@ public class CommunicationHandler {
   private final PrintWriter outputWriter;
   private final Socket socket;
   private CipherKeyHandler cipherKeyHandler;
-  private SecretKey aesKey;
 
   /**
    * Constructor for client handeler
@@ -28,8 +27,7 @@ public class CommunicationHandler {
     this.inputReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     this.outputWriter = new PrintWriter(socket.getOutputStream(), true);
     this.socket = socket;
-    this.cipherKeyHandler = new CipherKeyHandler();
-    this.aesKey = this.cipherKeyHandler.getAESKey();
+    this.cipherKeyHandler = CipherKeyHandler.getInstance();
   }
 
   /**

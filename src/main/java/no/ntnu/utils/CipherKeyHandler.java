@@ -10,16 +10,18 @@ import no.ntnu.tools.Logger;
 
 public class CipherKeyHandler {
   private SecretKey aesKey;
+  private static CipherKeyHandler instance;
 
   public CipherKeyHandler() {
     generateAESKey();
   }
 
-  public CipherKeyHandler(String aesKey) {
-    byte[] decodedKey = Base64.getDecoder().decode(aesKey);
-    this.aesKey = new SecretKeySpec(decodedKey, "AES");
+  public static synchronized CipherKeyHandler getInstance() {
+    if (instance == null) {
+      instance = new CipherKeyHandler();
+    }
+    return instance;
   }
-
 
   private void generateAESKey() {
     try {
@@ -30,19 +32,6 @@ public class CipherKeyHandler {
     } catch (NoSuchAlgorithmException e) {
       Logger.error(e.getMessage());
     }
-  }
-
-  public SecretKey getAESKey() {
-    return this.aesKey;
-  }
-
-  public String getAESKeyAsString() {
-    return Base64.getEncoder().encodeToString(this.aesKey.getEncoded());
-  }
-
-  public void setAESKey(String aesKey) {
-    byte[] decodedKey = Base64.getDecoder().decode(aesKey);
-    this.aesKey = new SecretKeySpec(decodedKey, "AES");
   }
 
   public String encryptMessageAES(String message) {
