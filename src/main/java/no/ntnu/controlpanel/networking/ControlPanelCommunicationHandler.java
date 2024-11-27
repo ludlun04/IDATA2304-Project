@@ -28,15 +28,15 @@ public class ControlPanelCommunicationHandler {
    * @param message String to be sent to the client
    */
   public void sendMessage(String message) {
-    this.handler.sendMessage(message);
+    this.handler.sendEncryptedMessage(message);
   }
 
   public String getMessage() {
-    return this.handler.getMessage();
+    return this.handler.getDecryptedMessage();
   }
 
   public void handleCommunication() throws IOException {
-    String message = this.handler.getMessage();
+    String message = this.handler.getDecryptedMessage();
 
     if (message != null) {
       Command command = this.commandParser.parse(message);

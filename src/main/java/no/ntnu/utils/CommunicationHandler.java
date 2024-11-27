@@ -44,6 +44,7 @@ public class CommunicationHandler {
    * Sends an encrypted message through the associated socket
    */
   public void sendEncryptedMessage(String message) {
+
     String encryptedMessage = this.cipherKeyHandler.encryptMessageAES(message);
     Logger.info("Sending and encrypting message: " + message);
     sendMessage(encryptedMessage);
@@ -75,6 +76,7 @@ public class CommunicationHandler {
   public String getDecryptedMessage() {
     String encryptedMessage = getMessage();
     if (encryptedMessage == null) {
+      Logger.error("Received null message");
       return null;
     }
     String decryptedMessage = this.cipherKeyHandler.decryptMessageAES(encryptedMessage);

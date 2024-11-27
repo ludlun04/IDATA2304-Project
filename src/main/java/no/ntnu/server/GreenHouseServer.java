@@ -89,7 +89,7 @@ public class GreenHouseServer extends Server {
         }
         socket.close();
       } catch (Exception e) {
-        Logger.error("Failed to create handler");
+        Logger.error("Failed to create handler, " + e.getMessage());
       }
 
     }).start();

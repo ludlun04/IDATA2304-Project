@@ -79,14 +79,14 @@ public class GreenhouseSimulator {
           System.out.println("WE MADE A SOCKET!!!!!!");
           CommunicationHandler handler = new CommunicationHandler(socket);
           this.handler = handler;
-          handler.sendMessage("I am greenhouse");
+          handler.sendEncryptedMessage("I am greenhouse");
 
           // initializeSensorListeners(node);
           // initializeActuatorListeners(node);
 
           boolean reachedEnd = false;
           while (!reachedEnd) {
-            String message = handler.getMessage();
+            String message = handler.getDecryptedMessage();
 
             if (message == null) {
               reachedEnd = true;
@@ -185,7 +185,7 @@ public class GreenhouseSimulator {
    */
   private void getNodeValues(String[] args) {
     for (Sensor sensor : this.getNode(Integer.parseInt(args[1])).getSensors()) {
-      this.handler.sendMessage("" + sensor.getReading().getValue());
+      this.handler.sendEncryptedMessage("" + sensor.getReading().getValue());
     }
   }
 
@@ -214,7 +214,7 @@ public class GreenhouseSimulator {
       response = String.format("%s %d %s", response, actuator.getId(), actuator.getType());
     }
 
-    this.handler.sendMessage(response);
+    this.handler.sendEncryptedMessage(response);
   }
 
 
@@ -229,7 +229,7 @@ public class GreenhouseSimulator {
           "updateActuatorInformation %d %d %b", nodeID,
           actuator.getId(),
           actuator.isOn());
-      this.handler.sendMessage(response);
+      this.handler.sendEncryptedMessage(response);
     });
   }
 
@@ -245,7 +245,7 @@ public class GreenhouseSimulator {
         response = String.format("%s %s %f %s", response, sensor.getType(),
             sensor.getReading().getValue(), sensor.getReading().getUnit());
       }
-      this.handler.sendMessage(response);
+      this.handler.sendEncryptedMessage(response);
     });
   }
 

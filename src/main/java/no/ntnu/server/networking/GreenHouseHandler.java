@@ -14,7 +14,7 @@ public class GreenHouseHandler {
   }
 
   public void sendMessage(String message) {
-    this.communicationHandler.sendMessage(message);
+    this.communicationHandler.sendEncryptedMessage(message);
   }
 
   public void sendEncryptedMessage(String message) {
@@ -24,7 +24,7 @@ public class GreenHouseHandler {
   public void start() {
     this.isConnected = true;
     while (isConnected) {
-      String message = this.communicationHandler.getMessage();
+      String message = this.communicationHandler.getDecryptedMessage();
 
       if (message == null) {
         this.isConnected = false;
