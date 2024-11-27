@@ -50,6 +50,7 @@ public abstract class Server {
 
         new Thread(() -> {
           Logger.info("Clients = " + this.handlers.size());
+          newHandler.createCipherCommunication();
 
           // Handle client for socket lifetime
           newHandler.handleCommunication();

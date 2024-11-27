@@ -23,12 +23,12 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
   }
 
   public void sendInitialDataRequest() {
-    this.handler.sendMessage("initialData");
+    this.handler.sendEncryptedMessageAES("initialData");
   }
 
   @Override
   public void sendActuatorChange(int nodeId, int actuatorId, boolean isOn) {
-    this.handler.sendMessage(String.format("set %d %d %b", nodeId, actuatorId, isOn));
+    this.handler.sendEncryptedMessageAES(String.format("set %d %d %b", nodeId, actuatorId, isOn));
   }
 
   /**
@@ -43,7 +43,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
    * @param amount     amount of sensors to add
    */
   public void addSensor(int nodeId, String sensorType, int min, int max, int current, String unit, int amount) {
-    this.handler.sendMessage(String.format("add sensor %d %s %d %d %d %s %d",
+    this.handler.sendEncryptedMessageAES(String.format("add sensor %d %s %d %d %d %s %d",
         nodeId, sensorType, min, max, current, unit, amount));
   }
 
@@ -54,7 +54,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
    * @param actuatorType type of actuator
    */
   public void addActuator(int nodeId, String actuatorType) {
-    this.handler.sendMessage(String.format("add actuator %d %s", nodeId, actuatorType));
+    this.handler.sendEncryptedMessageAES(String.format("add actuator %d %s", nodeId, actuatorType));
   }
 
   @Override
@@ -69,6 +69,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
         return;
       }
 
+      recieveAESkey();
       sendInitialDataRequest();
       while (this.stayConnected) {
         try {

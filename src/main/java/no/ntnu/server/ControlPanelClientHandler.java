@@ -2,29 +2,44 @@ package no.ntnu.server;
 
 import java.io.IOException;
 import java.net.Socket;
-import no.ntnu.greenhouse.GreenhouseSimulator;
+import java.util.List;
+import javax.crypto.SecretKey;
 import no.ntnu.greenhouse.Actuator;
+import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.greenhouse.Sensor;
 import no.ntnu.greenhouse.SensorActuatorNode;
-import java.util.List;
 import no.ntnu.tools.Logger;
+import no.ntnu.utils.CipherKeyHandler;
 import no.ntnu.utils.CommunicationHandler;
 
 public class ControlPanelClientHandler {
   private GreenhouseSimulator simulator;
+  private final CipherKeyHandler cipherKeyGenerator;
+  private final SecretKey aesKey;
   private CommunicationHandler handler;
 
-  public ControlPanelClientHandler(Socket socket, GreenhouseSimulator simulator) throws IOException {
+  public ControlPanelClientHandler(Socket socket, GreenhouseSimulator simulator)
+      throws IOException {
     this.handler = new CommunicationHandler(socket);
     this.simulator = simulator;
+    this.cipherKeyGenerator = new CipherKeyHandler();
+    this.aesKey = cipherKeyGenerator.getAESKey();
+  }
+
+  /**
+   * Initializes the communication with the client by sending public key,
+   * Getting the public key from the client and sending the AES key.
+   */
+  public void createCipherCommunication() {
+    sendAESKey();
   }
 
   public void handleCommunication() {
     boolean running = true;
 
     while (running) {
-      String message = this.handler.getMessage();
-    
+      String message = this.handler.getDecryptedMessageAES();
+
       if (message == null) {
         running = false;
       } else {
@@ -36,6 +51,7 @@ public class ControlPanelClientHandler {
 
   /**
    * Parses message and performs action based on parsed value.
+   *
    * @param message
    */
   private void handleMessage(String message) {
@@ -77,7 +93,7 @@ public class ControlPanelClientHandler {
 
   /**
    * Add an actuator to a node.
-   * 
+   *
    * @param args The arguments for values.
    */
   private void addActuatorToNode(String[] args) {
@@ -88,7 +104,7 @@ public class ControlPanelClientHandler {
 
   /**
    * Add a sensor to a node.
-   * 
+   *
    * @param args The arguments for values.
    */
   private void addSensorToNode(String[] args) {
@@ -100,7 +116,7 @@ public class ControlPanelClientHandler {
 
   /**
    * Set the actuator value.
-   * 
+   *
    * @param args The arguments for values.
    */
   private void setActuatorValue(String[] args) {
@@ -110,17 +126,17 @@ public class ControlPanelClientHandler {
 
   /**
    * Get the node values.
-   * 
+   *
    * @param args The arguments for values.
    */
   private void getNodeValues(String[] args) {
     for (Sensor sensor : this.simulator.getNode(Integer.parseInt(args[1])).getSensors()) {
-      this.handler.sendMessage("" + sensor.getReading().getValue());
+      this.handler.sendEncryptedMessageAES("" + sensor.getReading().getValue());
     }
   }
 
   /**
-   * Send initial data to client
+   * Send initial data to the client
    */
   public void sendInitialData() {
     for (SensorActuatorNode node : this.simulator.getNodes()) {
@@ -132,7 +148,7 @@ public class ControlPanelClientHandler {
 
   /**
    * Send node information to client
-   * 
+   *
    * @param node The node to send information about
    */
   private void sendNodeInformation(SensorActuatorNode node) {
@@ -142,12 +158,12 @@ public class ControlPanelClientHandler {
       response = String.format("%s %d %s", response, actuator.getId(), actuator.getType());
     }
 
-    this.handler.sendMessage(response);
+    this.handler.sendEncryptedMessageAES(response);
   }
 
   /**
    * Initialize actuator listeners
-   * 
+   *
    * @param node The node to initialize listeners for
    */
   private void initializeActuatorListeners(SensorActuatorNode node) {
@@ -156,13 +172,13 @@ public class ControlPanelClientHandler {
           "updateActuatorInformation %d %d %b", nodeID,
           actuator.getId(),
           actuator.isOn());
-      this.handler.sendMessage(response);
+      this.handler.sendEncryptedMessageAES(response);
     });
   }
 
   /**
    * Initialize sensor listeners
-   * 
+   *
    * @param node The node to initialize listeners for
    */
   private void initializeSensorListeners(SensorActuatorNode node) {
@@ -172,7 +188,7 @@ public class ControlPanelClientHandler {
         response = String.format("%s %s %f %s", response, sensor.getType(),
             sensor.getReading().getValue(), sensor.getReading().getUnit());
       }
-      this.handler.sendMessage(response);
+      this.handler.sendEncryptedMessageAES(response);
     });
   }
 
