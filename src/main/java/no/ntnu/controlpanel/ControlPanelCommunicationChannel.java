@@ -3,7 +3,9 @@ package no.ntnu.controlpanel;
 import java.io.IOException;
 import java.net.Socket;
 
-import no.ntnu.exceptions.ConnectionFailedException;
+import java.util.Arrays;
+import java.util.Base64;
+import javax.crypto.spec.SecretKeySpec;
 import no.ntnu.tools.Logger;
 
 public class ControlPanelCommunicationChannel implements CommunicationChannel {
@@ -42,7 +44,8 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
    * @param unit       unit the sensor reads in
    * @param amount     amount of sensors to add
    */
-  public void addSensor(int nodeId, String sensorType, int min, int max, int current, String unit, int amount) {
+  public void addSensor(int nodeId, String sensorType, int min, int max, int current, String unit,
+                        int amount) {
     this.handler.sendEncryptedMessageAES(String.format("add sensor %d %s %d %d %d %s %d",
         nodeId, sensorType, min, max, current, unit, amount));
   }
@@ -69,7 +72,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
         return;
       }
 
-      recieveAESkey();
+      receiveAESKey();
       sendInitialDataRequest();
       while (this.stayConnected) {
         try {
@@ -117,6 +120,15 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     } catch (InterruptedException e) {
       Logger.error("Could not sleep");
     }
+  }
+
+  private void receiveAESKey() {
+    String message = this.handler.getMessage();
+    Logger.info("Received AES key " + message);
+    byte[] aesKeyBytes = Base64.getDecoder().decode(message);
+    Logger.info("Decoded AES key bytes: " + Arrays.toString(aesKeyBytes));
+    this.handler.setAESKey(new SecretKeySpec(aesKeyBytes, "AES"));
+    Logger.info("Received AES key " + aesKeyBytes);
   }
 
   @Override

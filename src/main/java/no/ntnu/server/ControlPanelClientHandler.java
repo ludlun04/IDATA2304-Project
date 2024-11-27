@@ -2,6 +2,8 @@ package no.ntnu.server;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import javax.crypto.SecretKey;
 import no.ntnu.greenhouse.Actuator;
@@ -190,6 +192,16 @@ public class ControlPanelClientHandler {
       }
       this.handler.sendEncryptedMessageAES(response);
     });
+  }
+
+  /**
+   * Sends the AES key to the client
+   */
+  private void sendAESKey() {
+    String encodedKey = Base64.getEncoder().encodeToString(this.aesKey.getEncoded());
+    this.handler.sendMessage(encodedKey);
+    Logger.info("Sent AES key to client " + encodedKey);
+    Logger.info("AES key: " + Arrays.toString(this.aesKey.getEncoded()));
   }
 
   public void closeConnection() {

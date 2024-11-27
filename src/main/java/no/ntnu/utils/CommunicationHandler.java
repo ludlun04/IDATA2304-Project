@@ -31,7 +31,13 @@ public class CommunicationHandler {
     this.inputReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     this.outputWriter = new PrintWriter(clientSocket.getOutputStream(), true);
     this.cipherKeyHandler = new CipherKeyHandler();
-    this.aesKey = cipherKeyHandler.getAESKey();
+  }
+
+  /**
+   * Changes the AES key to a specified key
+   */
+  public void setAESKey(SecretKey key) {
+    this.cipherKeyHandler.setAESKey(key);
   }
 
   /**
@@ -84,7 +90,7 @@ public class CommunicationHandler {
    * @param message to be encrypted
    */
   public String encryptMessageAES(String message) {
-    return this.cipherKeyHandler.encryptAES(message, this.aesKey);
+    return this.cipherKeyHandler.encryptMessageAES(message);
   }
 
   /**
@@ -93,7 +99,7 @@ public class CommunicationHandler {
    * @param message to be decrypted
    */
   public String decryptMessageAES(String message) {
-    return this.cipherKeyHandler.decryptAES(message, this.aesKey);
+    return this.cipherKeyHandler.decryptMessageAES(message);
   }
 
   /**
