@@ -10,15 +10,20 @@ import no.ntnu.tools.Logger;
 
 public class CipherKeyHandler {
   private SecretKey aesKey;
-  private static CipherKeyHandler instance;
+  private static volatile CipherKeyHandler instance;
 
   public CipherKeyHandler() {
     generateAESKey();
   }
 
-  public static synchronized CipherKeyHandler getInstance() {
+  public static CipherKeyHandler getInstance() {
     if (instance == null) {
-      instance = new CipherKeyHandler();
+      // make sure only one instance of this can run at a time, preserves integrity of singleton
+      synchronized (CipherKeyHandler.class) {
+        if (instance == null) {
+          instance = new CipherKeyHandler();
+        }
+      }
     }
     return instance;
   }
