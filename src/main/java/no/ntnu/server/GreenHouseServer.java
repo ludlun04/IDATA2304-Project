@@ -34,13 +34,13 @@ public class GreenHouseServer extends Server {
 
   public void sendToAllClients(String message) {
     for (ControlPanelHandler controlPanelHandler : this.controlPanels) {
-      controlPanelHandler.sendMessage(message);
+      controlPanelHandler.sendEncryptedMessage(message);
     }
   }
 
   public void sendToGreenhouse(String message) {
     if (this.greenhouse != null) {
-      this.greenhouse.sendMessage(message);
+      this.greenhouse.sendEncryptedMessage(message);
     }
   }
 
@@ -57,17 +57,17 @@ public class GreenHouseServer extends Server {
       try {
         CommunicationHandler newHandler = new CommunicationHandler(socket);
 
-        String initialMessage = newHandler.getMessage();
+        String initialMessage = newHandler.getDecryptedMessage();
 
         switch (initialMessage) {
           case "I am controlpanel":
             ControlPanelHandler controlPanelHandler = new ControlPanelHandler(newHandler, this);
             Logger.info("Controlpanel added");
             this.controlPanels.add(controlPanelHandler);
-            newHandler.sendMessage("Hello from server");
+            newHandler.sendEncryptedMessage("Hello from server");
 
             if (this.greenhouse != null) {
-              this.greenhouse.sendMessage("setupNodes");
+              this.greenhouse.sendEncryptedMessage("setupNodes");
             }
 
             controlPanelHandler.start();
@@ -78,8 +78,8 @@ public class GreenHouseServer extends Server {
             GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler, this);
             this.greenhouse = greenHouseHandler;
             Logger.info("Greenhouse connected");
-            this.greenhouse.sendMessage("setupNodes");
-            this.greenhouse.sendMessage("startDataTransfer");
+            this.greenhouse.sendEncryptedMessage("setupNodes");
+            this.greenhouse.sendEncryptedMessage("startDataTransfer");
             this.greenhouse.start();
             this.greenhouse = null;
             break;

@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import javax.crypto.SecretKey;
+import no.ntnu.tools.Logger;
 
 /**
  * Class for handling the client
@@ -17,7 +18,7 @@ public class CommunicationHandler {
   private CipherKeyHandler cipherKeyHandler;
 
   /**
-   * Constructor for client handeler
+   * Constructor for client handler
    *
    * @param socket socket the client is connected to
    * @throws RuntimeException if constructor fails to open communication with
@@ -43,7 +44,10 @@ public class CommunicationHandler {
    * Sends an encrypted message through the associated socket
    */
   public void sendEncryptedMessage(String message) {
-    sendMessage(this.cipherKeyHandler.encryptMessageAES(message));
+    String encryptedMessage = this.cipherKeyHandler.encryptMessageAES(message);
+    Logger.info("Sending and encrypting message: " + message);
+    sendMessage(encryptedMessage);
+    Logger.info("Sent encrypted message: " + encryptedMessage);
   }
 
   /**
@@ -73,7 +77,10 @@ public class CommunicationHandler {
     if (encryptedMessage == null) {
       return null;
     }
-    return this.cipherKeyHandler.decryptMessageAES(encryptedMessage);
+    String decryptedMessage = this.cipherKeyHandler.decryptMessageAES(encryptedMessage);
+    Logger.info("Received encrypted message: " + encryptedMessage);
+    Logger.info("Decrypted message is: " + decryptedMessage);
+    return decryptedMessage;
   }
 
   public void close() {

@@ -18,16 +18,20 @@ public class ControlPanelHandler {
     this.communicationHandler.sendMessage(message);
   }
 
+  public void sendEncryptedMessage(String message) {
+    this.communicationHandler.sendEncryptedMessage(message);
+  }
+
   public void start() {
     this.isConnected = true;
     while (isConnected) {
-        String message = this.communicationHandler.getMessage();
+      String message = this.communicationHandler.getMessage();
 
-        if (message == null) {
-            this.isConnected = false;
-        } else {
-          this.server.sendToGreenhouse(message);
-        }
+      if (message == null) {
+        this.isConnected = false;
+      } else {
+        this.server.sendToGreenhouse(message);
+      }
 
     }
   }
