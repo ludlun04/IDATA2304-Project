@@ -111,10 +111,9 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
   private void createHandler() throws IOException {
     this.handler = new ControlPanelCommunicationHandler(
-        new Socket("127.0.0.1", 8765), this.logic);
+        new Socket("127.0.0.1", 8765), new CommandParser(logic));
 
     performHandshake();
-
   }
 
   private boolean attemptReconnect() {

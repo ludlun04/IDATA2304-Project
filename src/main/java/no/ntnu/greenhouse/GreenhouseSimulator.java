@@ -74,29 +74,34 @@ public class GreenhouseSimulator {
   private void initiateRealCommunication() {
     // TODO - here you can set up the TCP or UDP communication
     new Thread(() -> {
-      try (Socket socket = new Socket("127.0.0.1", 8765)) {
-        System.out.println("WE MADE A SOCKET!!!!!!");
-        CommunicationHandler handler = new CommunicationHandler(socket);
-        this.handler = handler;
-        handler.sendMessage("I am greenhouse");
-        
-        // initializeSensorListeners(node);
-        // initializeActuatorListeners(node);
+      boolean reconnect = true;
+      while (reconnect) {
+        try (Socket socket = new Socket("127.0.0.1", 8765)) {
+          System.out.println("WE MADE A SOCKET!!!!!!");
+          CommunicationHandler handler = new CommunicationHandler(socket);
+          this.handler = handler;
+          handler.sendMessage("I am greenhouse");
+          
+          // initializeSensorListeners(node);
+          // initializeActuatorListeners(node);
 
-        boolean reachedEnd = false;
-        while (!reachedEnd) {
-          String message = handler.getMessage();
-  
-          if (message == null) {
-            reachedEnd = true;
-          } else {
-            reachedEnd = handleMessage(message);
+          boolean reachedEnd = false;
+          while (!reachedEnd) {
+            String message = handler.getMessage();
+      
+            if (message == null) {
+              reachedEnd = true;
+            } else {
+              reachedEnd = handleMessage(message);
+            }
           }
-        }
-  
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+
+          //reconnect = false;
+      
+        } catch (IOException e) {
+            //throw new RuntimeException(e);
+          }
+    }
     }).start();
   }
 
