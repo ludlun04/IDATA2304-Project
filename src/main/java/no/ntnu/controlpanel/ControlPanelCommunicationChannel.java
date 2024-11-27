@@ -144,7 +144,6 @@ public class ControlPanelCommunicationChannel extends CommunicationHandler
     }
   }
 
-  @Override
   public void close() {
     //TODO: Implement close
   }

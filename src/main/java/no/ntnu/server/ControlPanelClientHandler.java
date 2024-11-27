@@ -186,6 +186,7 @@ public class ControlPanelClientHandler extends CommunicationHandler {
    */
   private void closeConnection() {
     super.close();
+    //TODO: Close the socket connection
   }
 
 
