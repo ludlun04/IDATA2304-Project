@@ -17,6 +17,6 @@ public class UpdateSensors extends Command {
 
     @Override
     public void execute() {
-        this.logic.onSensorData(0, readings);
+        this.logic.onSensorData(nodeId, readings);
     }
 }

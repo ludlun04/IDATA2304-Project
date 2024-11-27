@@ -76,11 +76,11 @@ public class GreenHouseServer extends Server {
 
           case "I am greenhouse":
             GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler, this);
-            Logger.info("Greenhouse connected");
-            newHandler.sendMessage("setupNodes");
-            newHandler.sendMessage("startDataTransfer");
             this.greenhouse = greenHouseHandler;
-            greenHouseHandler.start();
+            Logger.info("Greenhouse connected");
+            this.greenhouse.sendMessage("setupNodes");
+            this.greenhouse.sendMessage("startDataTransfer");
+            this.greenhouse.start();
             this.greenhouse = null;
             break;
 
