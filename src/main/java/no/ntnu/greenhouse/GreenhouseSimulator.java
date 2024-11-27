@@ -2,13 +2,14 @@ package no.ntnu.greenhouse;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import no.ntnu.listeners.greenhouse.NodeStateListener;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Application entrypoint - a simulator for a greenhouse.
@@ -79,10 +80,12 @@ public class GreenhouseSimulator {
           System.out.println("WE MADE A SOCKET!!!!!!");
           CommunicationHandler handler = new CommunicationHandler(socket);
           this.handler = handler;
-          handler.sendEncryptedMessage("I am greenhouse");
+          handler.sendMessage("I am greenhouse");
 
           // initializeSensorListeners(node);
           // initializeActuatorListeners(node);
+
+          handleMessage(this.handler.getMessage()); //first message not encrypted
 
           boolean reachedEnd = false;
           while (!reachedEnd) {
@@ -109,6 +112,9 @@ public class GreenhouseSimulator {
     boolean shouldClose = fake;
     try {
       switch (args[0]) {
+        case "Encrypt":
+          setupEncryption(args[1]);
+          break;
         case "setupNodes":
           setupNodes();
           break;
@@ -137,12 +143,21 @@ public class GreenhouseSimulator {
           Logger.error("Unknown command: " + args[0]);
           break;
       }
-    } catch (NumberFormatException e) {
-      Logger.error("Handeling messages failed because");
-      Logger.error(e.getMessage());
+    } catch (IllegalArgumentException e) {
+      Logger.error("Handling messages failed. " + e.getMessage());
+    } catch (IndexOutOfBoundsException e) {
+      Logger.error("Missing command parameters. " + e.getMessage());
     }
 
     return shouldClose;
+  }
+
+  private void setupEncryption(String keyEncoded) {
+
+    byte[] keyDecoded = Base64.getDecoder().decode(keyEncoded);
+    SecretKey key = new SecretKeySpec(keyDecoded, "AES");
+    this.handler.enableEncryptionwithKey(key);
+    this.handler.sendEncryptedMessage("OK");
   }
 
   /**

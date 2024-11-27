@@ -65,18 +65,19 @@ public class GreenHouseServer extends Server {
         String initialMessage = newHandler.getMessage();
 
         String keyEncoded = Base64.getEncoder().encodeToString(uniqueHandlerKey.getEncoded());
+        String encryptionResponse = null;
 
         switch (initialMessage) {
           case "I am controlpanel":
             newHandler.sendMessage("Hello from server");
             ControlPanelHandler controlPanelHandler = new ControlPanelHandler(newHandler, this);
-            Logger.info("Controlpanel added");
+            Logger.info("Controlpanel added (" + this.controlPanels.size() + " in total).");
 
             newHandler.sendMessage("Encrypt " + keyEncoded);
-            String response = newHandler.getDecryptedMessage();
+            encryptionResponse = newHandler.getDecryptedMessage();
 
             // attempt to get encrypted message, if 'OK' we know encryption is working
-            if ("OK".equals(response)) {
+            if ("OK".equals(encryptionResponse)) {
               Logger.info("Encryption successfully established");
               this.controlPanels.add(controlPanelHandler);
               if (this.greenhouse != null) {
@@ -94,18 +95,23 @@ public class GreenHouseServer extends Server {
             GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler, this);
             this.greenhouse = greenHouseHandler;
             Logger.info("Greenhouse connected");
-            this.greenhouse.sendEncryptedMessage("setupNodes");
-            this.greenhouse.sendEncryptedMessage("startDataTransfer");
-            this.greenhouse.start();
-            this.greenhouse = null;
-            break;
 
+            newHandler.sendMessage("Encrypt " + keyEncoded);
+            encryptionResponse = newHandler.getDecryptedMessage();
+
+            // attempt to get encrypted message, if 'OK' we know encryption is working
+            if ("OK".equals(encryptionResponse)) {
+              this.greenhouse.sendEncryptedMessage("setupNodes");
+              this.greenhouse.sendEncryptedMessage("startDataTransfer");
+              this.greenhouse.start();
+              this.greenhouse = null;
+            } else {
+              Logger.error("Encryption failed");
+            }
+            break;
           default:
             Logger.error("Unsupported node: " + initialMessage);
         }
-
-
-
         socket.close();
       } catch (Exception e) {
         Logger.error("Failed to create handler, " + e.getMessage());
