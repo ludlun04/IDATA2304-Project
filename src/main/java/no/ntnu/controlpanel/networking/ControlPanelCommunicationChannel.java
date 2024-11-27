@@ -6,6 +6,7 @@ import java.net.Socket;
 import no.ntnu.controlpanel.CommunicationChannel;
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.tools.Logger;
+import no.ntnu.utils.CommunicationHandler;
 
 public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
@@ -54,7 +55,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
 
   @Override
   public void sendActuatorChange(int nodeId, int actuatorId, boolean isOn) {
-    this.handler.sendMessage(String.format("set %d %d %b", nodeId, actuatorId, isOn));
+    this.handler.sendEncryptedMessage(String.format("set %d %d %b", nodeId, actuatorId, isOn));
   }
 
   /**
@@ -69,7 +70,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
    * @param amount     amount of sensors to add
    */
   public void addSensor(int nodeId, String sensorType, int min, int max, int current, String unit, int amount) {
-    this.handler.sendMessage(String.format("add sensor %d %s %d %d %d %s %d",
+    this.handler.sendEncryptedMessage(String.format("add sensor %d %s %d %d %d %s %d",
         nodeId, sensorType, min, max, current, unit, amount));
   }
 
@@ -80,7 +81,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
    * @param actuatorType type of actuator
    */
   public void addActuator(int nodeId, String actuatorType) {
-    this.handler.sendMessage(String.format("add actuator %d %s", nodeId, actuatorType));
+    this.handler.sendEncryptedMessage(String.format("add actuator %d %s", nodeId, actuatorType));
   }
 
   @Override
@@ -88,19 +89,14 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     this.stayConnected = true;
     Logger.info("Connecting to socket");
 
+    attemptConnect();
       new Thread(() -> {
-
-        while (this.stayConnected) {
+          while (this.stayConnected) {
           try {
-            this.handler.handleCommunication();
+            this.handler.handleEncryptedMessage();
           } catch (IOException | NullPointerException exception ) {
-            stayConnected = attemptReconnect();
-            if (!stayConnected) {
-              Logger.info("Could not connect, stopping communication channel.");
-              this.stayConnected = false;
-              this.logic.onCommunicationChannelClosed();
-
-            }
+            Logger.error("Lost connection. " + exception.getMessage());
+            handleAttemptedReconnection();
           }
 
         }
@@ -109,16 +105,27 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     return stayConnected;
   }
 
-  private void createHandler() throws IOException {
-    this.handler = new ControlPanelCommunicationHandler(
-        new Socket("127.0.0.1", 8765), new CommandParser(logic));
+  private void handleAttemptedReconnection() {
+    stayConnected = attemptConnect();
+    if (!stayConnected) {
+      Logger.info("Could not connect, stopping communication channel.");
+      this.stayConnected = false;
+      this.logic.onCommunicationChannelClosed();
 
-    performHandshake();
+    }
   }
 
-  private boolean attemptReconnect() {
-    int tries = RECONNECT_ATTEMPTS;
+  private void createHandler() throws IOException {
+    CommunicationHandler communicationHandler = new CommunicationHandler(new Socket("127.0.0.1", 8765));
+    this.handler = new ControlPanelCommunicationHandler(communicationHandler,
+            new CommandParser(logic, communicationHandler));
 
+    performHandshake();
+    this.handler.handleMessage(); // needed to establish encryption
+  }
+
+  private boolean attemptConnect() {
+    int tries = RECONNECT_ATTEMPTS;
     boolean result = false;
 
     while (tries != 0 && !result) {

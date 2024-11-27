@@ -1,11 +1,11 @@
-package no.ntnu.controlpanel.networking.Commands;
+package no.ntnu.controlpanel.networking.Commands.logic;
 
 import java.util.List;
 
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.greenhouse.SensorReading;
 
-public class UpdateSensors extends Command {
+public class UpdateSensors extends LogicCommand {
     private List<SensorReading> readings;
     private int nodeId;
 

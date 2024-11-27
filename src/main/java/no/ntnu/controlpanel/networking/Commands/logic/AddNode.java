@@ -1,9 +1,9 @@
-package no.ntnu.controlpanel.networking.Commands;
+package no.ntnu.controlpanel.networking.Commands.logic;
 
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.SensorActuatorNodeInfo;
 
-public class AddNode extends Command {
+public class AddNode extends LogicCommand {
     private SensorActuatorNodeInfo sensorActuatorNodeInfo;
 
     public AddNode(ControlPanelLogic logic, SensorActuatorNodeInfo info) {

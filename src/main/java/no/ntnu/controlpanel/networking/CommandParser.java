@@ -1,26 +1,26 @@
 package no.ntnu.controlpanel.networking;
 
-import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.SensorActuatorNodeInfo;
-import no.ntnu.controlpanel.networking.Commands.AddNode;
 import no.ntnu.controlpanel.networking.Commands.Command;
-import no.ntnu.controlpanel.networking.Commands.RemoveNode;
-import no.ntnu.controlpanel.networking.Commands.UpdateActuator;
-import no.ntnu.controlpanel.networking.Commands.UpdateSensors;
+import no.ntnu.controlpanel.networking.Commands.logic.*;
+
+import no.ntnu.controlpanel.networking.Commands.EnableEncryption;
 import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.SensorReading;
+import no.ntnu.utils.CommunicationHandler;
 
 public class CommandParser {
   private ControlPanelLogic logic;
+  private CommunicationHandler handler;
 
-  public CommandParser(ControlPanelLogic logic) {
+  public CommandParser(ControlPanelLogic logic, CommunicationHandler handler) {
     this.logic = logic;
+    this.handler = handler;
   }
 
   /**
@@ -31,32 +31,40 @@ public class CommandParser {
    * @param message to be parsed
    * @return returns the coresponding command
    */
-  public Command parse(String message) {
+  public Command parse(String message) throws IllegalArgumentException {
     Command command = null;
 
     List<String> strings = List.of(message.split(" "));
     ArrayDeque<String> args = new ArrayDeque<>(strings);
 
     String commandword = args.poll();
-    int nodeId = Integer.parseInt(args.poll());
 
-    switch (commandword) {
-      case "add" -> {
-        SensorActuatorNodeInfo sensorActuatorNodeInfo = parseSensorActuatorNodeInfo(nodeId, args);
-        command = new AddNode(logic, sensorActuatorNodeInfo);
+    if (commandword.equals("Encrypt")) {
+      String keyEncoded = String.valueOf(args.poll());
+      command = new EnableEncryption(handler, keyEncoded);
+    } else {
+      int nodeId = Integer.parseInt(args.poll());
+
+      switch (commandword) {
+        case "add" -> {
+          SensorActuatorNodeInfo sensorActuatorNodeInfo = parseSensorActuatorNodeInfo(nodeId, args);
+          command = new AddNode(logic, sensorActuatorNodeInfo);
+        }
+        case "remove" -> command = new RemoveNode(logic, nodeId);
+        case "updateSensorsInformation" -> {
+          ArrayList<SensorReading> readings = parseReadings(args);
+          command = new UpdateSensors(logic, nodeId, readings);
+        }
+        case "updateActuatorInformation" -> {
+          int actuatorId = Integer.parseInt(args.poll());
+          boolean state = Boolean.parseBoolean(args.poll());
+          command = new UpdateActuator(logic, nodeId, actuatorId, state);
+        }
+        default -> throw new NoSuchCommand();
       }
-      case "remove" -> command = new RemoveNode(logic, nodeId);
-      case "updateSensorsInformation" -> {
-        ArrayList<SensorReading> readings = parseReadings(args);
-        command = new UpdateSensors(logic, nodeId, readings);
-      }
-      case "updateActuatorInformation" -> {
-        int actuatorId = Integer.parseInt(args.poll());
-        boolean state = Boolean.parseBoolean(args.poll());
-        command = new UpdateActuator(logic, nodeId, actuatorId, state);
-      }
-      default -> throw new NoSuchCommand();
     }
+
+
 
     return command;
   }

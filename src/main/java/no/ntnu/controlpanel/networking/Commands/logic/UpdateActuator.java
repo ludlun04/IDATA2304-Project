@@ -1,8 +1,8 @@
-package no.ntnu.controlpanel.networking.Commands;
+package no.ntnu.controlpanel.networking.Commands.logic;
 
 import no.ntnu.controlpanel.ControlPanelLogic;
 
-public class UpdateActuator extends Command {
+public class UpdateActuator extends LogicCommand {
     private int actuatorId;
     private boolean state;
     private int nodeId;

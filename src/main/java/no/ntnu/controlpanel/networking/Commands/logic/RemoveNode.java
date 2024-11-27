@@ -1,8 +1,8 @@
-package no.ntnu.controlpanel.networking.Commands;
+package no.ntnu.controlpanel.networking.Commands.logic;
 
 import no.ntnu.controlpanel.ControlPanelLogic;
 
-public class RemoveNode extends Command {
+public class RemoveNode extends LogicCommand {
     private int nodeId;
 
     public RemoveNode(ControlPanelLogic logic, int nodeId) {

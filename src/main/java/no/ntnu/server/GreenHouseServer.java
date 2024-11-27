@@ -3,10 +3,13 @@ package no.ntnu.server;
 import no.ntnu.server.networking.ControlPanelHandler;
 import no.ntnu.server.networking.GreenHouseHandler;
 import no.ntnu.tools.Logger;
+import no.ntnu.utils.CipherKeyHandler;
 import no.ntnu.utils.CommunicationHandler;
 
+import javax.crypto.SecretKey;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Base64;
 
 public class GreenHouseServer extends Server {
   private ArrayList<ControlPanelHandler> controlPanels;
@@ -56,22 +59,35 @@ public class GreenHouseServer extends Server {
     new Thread(() -> {
       try {
         CommunicationHandler newHandler = new CommunicationHandler(socket);
+        SecretKey uniqueHandlerKey = CipherKeyHandler.getNewRandomAESKey();
+        newHandler.enableEncryptionwithKey(uniqueHandlerKey);
 
-        String initialMessage = newHandler.getDecryptedMessage();
+        String initialMessage = newHandler.getMessage();
+
+        String keyEncoded = Base64.getEncoder().encodeToString(uniqueHandlerKey.getEncoded());
 
         switch (initialMessage) {
           case "I am controlpanel":
+            newHandler.sendMessage("Hello from server");
             ControlPanelHandler controlPanelHandler = new ControlPanelHandler(newHandler, this);
             Logger.info("Controlpanel added");
-            this.controlPanels.add(controlPanelHandler);
-            newHandler.sendEncryptedMessage("Hello from server");
 
-            if (this.greenhouse != null) {
-              this.greenhouse.sendEncryptedMessage("setupNodes");
+            newHandler.sendMessage("Encrypt " + keyEncoded);
+            String response = newHandler.getDecryptedMessage();
+
+            // attempt to get encrypted message, if 'OK' we know encryption is working
+            if ("OK".equals(response)) {
+              Logger.info("Encryption successfully established");
+              this.controlPanels.add(controlPanelHandler);
+              if (this.greenhouse != null) {
+                this.greenhouse.sendEncryptedMessage("setupNodes");
+              }
+              controlPanelHandler.start();
+              this.controlPanels.remove(controlPanelHandler);
+            } else {
+              Logger.error("Encryption failed");
             }
 
-            controlPanelHandler.start();
-            this.controlPanels.remove(controlPanelHandler);
             break;
 
           case "I am greenhouse":
@@ -87,9 +103,12 @@ public class GreenHouseServer extends Server {
           default:
             Logger.error("Unsupported node: " + initialMessage);
         }
+
+
+
         socket.close();
       } catch (Exception e) {
-        Logger.error("Failed to create handler");
+        Logger.error("Failed to create handler, " + e.getMessage());
       }
 
     }).start();

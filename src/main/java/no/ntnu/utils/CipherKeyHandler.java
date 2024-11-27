@@ -10,33 +10,21 @@ import no.ntnu.tools.Logger;
 
 public class CipherKeyHandler {
   private SecretKey aesKey;
-  private static volatile CipherKeyHandler instance;
 
-  public CipherKeyHandler() {
-    generateAESKey();
+  public CipherKeyHandler(SecretKey aesKey) {
+    this.aesKey = aesKey;
   }
 
-  public static CipherKeyHandler getInstance() {
-    if (instance == null) {
-      // make sure only one instance of this can run at a time, preserves integrity of singleton
-      synchronized (CipherKeyHandler.class) {
-        if (instance == null) {
-          instance = new CipherKeyHandler();
-        }
-      }
-    }
-    return instance;
-  }
-
-  private void generateAESKey() {
+  public static SecretKey getNewRandomAESKey() {
+    SecretKey secretKey = null;
     try {
       KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
       keyGenerator.init(256);
-      SecretKey secretKey = keyGenerator.generateKey();
-      this.aesKey = secretKey;
+      secretKey = keyGenerator.generateKey();
     } catch (NoSuchAlgorithmException e) {
       Logger.error(e.getMessage());
     }
+    return secretKey;
   }
 
   public String encryptMessageAES(String message) {
