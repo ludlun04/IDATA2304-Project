@@ -17,7 +17,7 @@ public class CommunicationHandler {
   /**
    * Constructor for client handeler
    *
-   * @param clientSocket socket the client is connected to
+   * @param socket socket the client is connected to
    * @throws RuntimeException if constructor fails to open communication with
    *                          socket
    */

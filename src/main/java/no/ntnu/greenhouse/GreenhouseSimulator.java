@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import no.ntnu.listeners.greenhouse.NodeStateListener;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
@@ -81,14 +80,14 @@ public class GreenhouseSimulator {
           CommunicationHandler handler = new CommunicationHandler(socket);
           this.handler = handler;
           handler.sendMessage("I am greenhouse");
-          
+
           // initializeSensorListeners(node);
           // initializeActuatorListeners(node);
 
           boolean reachedEnd = false;
           while (!reachedEnd) {
             String message = handler.getMessage();
-      
+
             if (message == null) {
               reachedEnd = true;
             } else {
@@ -97,7 +96,7 @@ public class GreenhouseSimulator {
           }
 
           //reconnect = false;
-      
+
         } catch (IOException e) {
             //throw new RuntimeException(e);
           }
@@ -148,7 +147,7 @@ public class GreenhouseSimulator {
 
   /**
    * Add an actuator to a node.
-   * 
+   *
    * @param args The arguments for values.
    */
   private void addActuatorToNode(String[] args) {
@@ -159,7 +158,7 @@ public class GreenhouseSimulator {
 
   /**
    * Add a sensor to a node.
-   * 
+   *
    * @param args The arguments for values.
    */
   private void addSensorToNode(String[] args) {
@@ -171,7 +170,7 @@ public class GreenhouseSimulator {
 
   /**
    * Set the actuator value.
-   * 
+   *
    * @param args The arguments for values.
    */
   private void setActuatorValue(String[] args) {
@@ -181,7 +180,7 @@ public class GreenhouseSimulator {
 
   /**
    * Get the node values.
-   * 
+   *
    * @param args The arguments for values.
    */
   private void getNodeValues(String[] args) {
@@ -205,7 +204,7 @@ public class GreenhouseSimulator {
 
   /**
    * Send node information to client
-   * 
+   *
    * @param node The node to send information about
    */
   private void sendNodeInformation(SensorActuatorNode node) {
@@ -221,7 +220,7 @@ public class GreenhouseSimulator {
 
     /**
    * Initialize actuator listeners
-   * 
+   *
    * @param node The node to initialize listeners for
    */
   private void initializeActuatorListeners(SensorActuatorNode node) {
@@ -236,7 +235,7 @@ public class GreenhouseSimulator {
 
   /**
    * Initialize sensor listeners
-   * 
+   *
    * @param node The node to initialize listeners for
    */
   private void initializeSensorListeners(SensorActuatorNode node) {
