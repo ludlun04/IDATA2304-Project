@@ -59,7 +59,7 @@ public class GreenHouseServer extends Server {
     new Thread(() -> {
       try {
         CommunicationHandler newHandler = new CommunicationHandler(socket);
-        SecretKey uniqueHandlerKey = CipherKeyHandler.getNewRandomAESKey();
+        SecretKey uniqueHandlerKey = CipherKeyHandler.getNewRandomAesKey();
         newHandler.enableEncryptionwithKey(uniqueHandlerKey);
 
         String initialMessage = newHandler.getMessage();
