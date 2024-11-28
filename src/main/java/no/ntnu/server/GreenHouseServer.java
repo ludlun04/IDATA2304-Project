@@ -119,9 +119,4 @@ public class GreenHouseServer extends Server {
 
     }).start();
   }
-
-  public static void main(String[] args) {
-    GreenHouseServer server = new GreenHouseServer(8765);
-    server.start();
-  }
 }

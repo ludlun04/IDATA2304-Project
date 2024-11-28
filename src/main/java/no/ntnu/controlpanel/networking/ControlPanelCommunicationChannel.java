@@ -166,5 +166,4 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
   public void close() {
     this.stayConnected = false;
   }
-
 }
