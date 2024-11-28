@@ -11,8 +11,7 @@ public class ControlPanelCommunicationHandler {
   private CommandParser commandParser;
   private CommunicationHandler handler;
 
-  public ControlPanelCommunicationHandler(CommunicationHandler handler, CommandParser commandParser)
-      throws IOException {
+  public ControlPanelCommunicationHandler(CommunicationHandler handler, CommandParser commandParser) {
     this.handler = handler;
     this.commandParser = commandParser;
   }

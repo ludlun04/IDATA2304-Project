@@ -39,11 +39,11 @@ public class CommandParser {
 
     String commandWord = args.poll();
 
-    if (commandWord.equals("encrypt")) {
-      String keyEncoded = String.valueOf(args.poll());
-      command = new EnableEncryption(handler, keyEncoded);
-    } else {
       switch (commandWord) {
+        case "Encrypt" -> {
+          String keyEncoded = String.valueOf(args.poll());
+          command = new EnableEncryption(handler, keyEncoded);
+        }
         case "setupNodes" -> {
           command = new SetupNodes(simulator);
         }
@@ -79,9 +79,7 @@ public class CommandParser {
         }
         default -> throw new NoSuchCommand();
       }
-    }
-
-
     return command;
+    }
   }
-}
+

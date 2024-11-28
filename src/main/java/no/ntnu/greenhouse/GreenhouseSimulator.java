@@ -19,7 +19,7 @@ public class GreenhouseSimulator {
 
   private final List<PeriodicSwitch> periodicSwitches = new LinkedList<>();
   private final boolean fake;
-  private CommunicationHandler handler;
+  private GreenhouseCommunicationHandler handler;
 
   /**
    * Create a greenhouse simulator.
@@ -72,85 +72,27 @@ public class GreenhouseSimulator {
   }
 
   private void initiateRealCommunication() {
-    // TODO - here you can set up the TCP or UDP communication
     new Thread(() -> {
       boolean reconnect = true;
       while (reconnect) {
         try (Socket socket = new Socket("127.0.0.1", 8765)) {
           System.out.println("WE MADE A SOCKET!!!!!!");
           CommunicationHandler handler = new CommunicationHandler(socket);
-          this.handler = handler;
+          this.handler = new GreenhouseCommunicationHandler(handler, new CommandParser(this, handler));
           handler.sendMessage("I am greenhouse");
 
-          // initializeSensorListeners(node);
-          // initializeActuatorListeners(node);
-
-          handleMessage(this.handler.getMessage()); //first message not encrypted
+          this.handler.handleMessage(); //first message not encrypted
 
           boolean reachedEnd = false;
           while (!reachedEnd) {
-            String message = handler.getDecryptedMessage();
-
-            if (message == null) {
-              reachedEnd = true;
-            } else {
-              reachedEnd = handleMessage(message);
-            }
+            reachedEnd = this.handler.handleEncryptedMessage();
           }
 
-          //reconnect = false;
-
         } catch (IOException e) {
-          //throw new RuntimeException(e);
+           Logger.error("Failed to connect to server: " + e.getMessage());
         }
       }
     }).start();
-  }
-
-  private boolean handleMessage(String message) {
-    String args[] = message.split(" ");
-    //TODO: Move all stuff here to commandparser, also change the classes and methods to get a nodeId instead of a Node. Getting a node might lead to problems.
-    boolean shouldClose = fake;
-    try {
-      switch (args[0]) {
-        case "Encrypt":
-          setupEncryption(args[1]);
-          break;
-        case "setupNodes":
-          setupNodes();
-          break;
-        case "startDataTransfer":
-          startDataTransfer();
-          break;
-        case "get":
-          getNodeValues(args);
-          break;
-        case "set":
-          setActuatorValue(args);
-          break;
-        case "add":
-          switch (args[1]) {
-            case "sensor":
-              addSensorToNode(args);
-              break;
-            case "actuator":
-              addActuatorToNode(args);
-              break;
-          }
-        case "close":
-          shouldClose = true;
-          break;
-        default:
-          Logger.error("Unknown command: " + args[0]);
-          break;
-      }
-    } catch (IllegalArgumentException e) {
-      Logger.error("Handling messages failed. " + e.getMessage());
-    } catch (IndexOutOfBoundsException e) {
-      Logger.error("Missing command parameters. " + e.getMessage());
-    }
-
-    return shouldClose;
   }
 
   public void setupEncryption(SecretKey key) {

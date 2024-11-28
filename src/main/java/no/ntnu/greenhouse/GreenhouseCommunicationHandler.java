@@ -1,5 +1,7 @@
 package no.ntnu.greenhouse;
 
+import javax.crypto.SecretKey;
+import no.ntnu.controlpanel.networking.NoSuchCommand;
 import no.ntnu.utils.commands.Command;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
@@ -7,14 +9,16 @@ import no.ntnu.utils.CommunicationHandler;
 import java.io.IOException;
 
 public class GreenhouseCommunicationHandler {
-  //TODO: Finish class to move handling of messages to this class from GreenhouseSimulator.java
   private CommandParser commandParser;
   private CommunicationHandler handler;
 
-  public GreenhouseCommunicationHandler(CommunicationHandler handler, CommandParser commandParser)
-      throws IOException {
+  public GreenhouseCommunicationHandler(CommunicationHandler handler, CommandParser commandParser) {
     this.handler = handler;
     this.commandParser = commandParser;
+  }
+
+  public void enableEncryptionwithKey(SecretKey key) {
+    this.handler.enableEncryptionwithKey(key);
   }
 
   /**
@@ -38,14 +42,15 @@ public class GreenhouseCommunicationHandler {
     return this.handler.getDecryptedMessage();
   }
 
-  public void handleEncryptedMessage() throws IOException {
-    String message = this.handler.getDecryptedMessage();
+  public boolean handleEncryptedMessage() throws IOException {
+    String message = this.getDecryptedMessage();
 
     handlePlainMessage(message);
+    return false;
   }
 
   public void handleMessage() throws IOException {
-    String message = this.handler.getMessage();
+    String message = this.getMessage();
 
     handlePlainMessage(message);
   }
@@ -55,7 +60,7 @@ public class GreenhouseCommunicationHandler {
       Command command = null;
       try {
         command = this.commandParser.parse(message);
-      } catch (IllegalArgumentException e) {
+      } catch (IllegalArgumentException | NoSuchCommand e) {
         Logger.error("Failed to parse command. " + e.getMessage());
       }
 
