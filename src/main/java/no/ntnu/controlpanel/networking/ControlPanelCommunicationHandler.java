@@ -1,6 +1,6 @@
 package no.ntnu.controlpanel.networking;
 
-import no.ntnu.controlpanel.networking.Commands.Command;
+import no.ntnu.utils.commands.Command;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
 
@@ -11,14 +11,15 @@ public class ControlPanelCommunicationHandler {
   private CommandParser commandParser;
   private CommunicationHandler handler;
 
-  public ControlPanelCommunicationHandler(CommunicationHandler handler, CommandParser commandParser) throws IOException {
+  public ControlPanelCommunicationHandler(CommunicationHandler handler, CommandParser commandParser)
+      throws IOException {
     this.handler = handler;
     this.commandParser = commandParser;
   }
 
   /**
    * Sends a message to the client.
-   * 
+   *
    * @param message String to be sent to the client
    */
   public void sendMessage(String message) {

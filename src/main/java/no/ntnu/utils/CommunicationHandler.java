@@ -49,9 +49,7 @@ public class CommunicationHandler {
   public void sendEncryptedMessage(String message) {
 
     String encryptedMessage = this.cipherKeyHandler.encryptMessageAES(message);
-    Logger.info("Sending and encrypting message: " + message);
     sendMessage(encryptedMessage);
-    Logger.info("Sent encrypted message: " + encryptedMessage);
   }
 
   /**
@@ -83,8 +81,6 @@ public class CommunicationHandler {
       return null;
     }
     String decryptedMessage = this.cipherKeyHandler.decryptMessageAES(encryptedMessage);
-    Logger.info("Received encrypted message: " + encryptedMessage);
-    Logger.info("Decrypted message is: " + decryptedMessage);
     return decryptedMessage;
   }
 

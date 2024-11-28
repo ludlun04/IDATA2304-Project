@@ -6,10 +6,13 @@ import java.util.List;
 
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.SensorActuatorNodeInfo;
-import no.ntnu.controlpanel.networking.Commands.Command;
-import no.ntnu.controlpanel.networking.Commands.logic.*;
+import no.ntnu.controlpanel.networking.commands.AddNode;
+import no.ntnu.controlpanel.networking.commands.RemoveNode;
+import no.ntnu.controlpanel.networking.commands.UpdateActuator;
+import no.ntnu.controlpanel.networking.commands.UpdateSensors;
+import no.ntnu.utils.commands.Command;
 
-import no.ntnu.controlpanel.networking.Commands.EnableEncryption;
+import no.ntnu.utils.commands.EnableEncryption;
 import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.SensorReading;
 import no.ntnu.utils.CommunicationHandler;
@@ -25,11 +28,11 @@ public class CommandParser {
 
   /**
    * Takes in a message and parses out a command based on the contents of the message
-   * 
-   * @throws NoSuchCommand exception if command isn't found or other exception
-   * @throws RuntimeException if something else goes wrong during parsing of the message
+   *
    * @param message to be parsed
    * @return returns the coresponding command
+   * @throws NoSuchCommand    exception if command isn't found or other exception
+   * @throws RuntimeException if something else goes wrong during parsing of the message
    */
   public Command parse(String message) throws IllegalArgumentException {
     Command command = null;
@@ -65,7 +68,6 @@ public class CommandParser {
     }
 
 
-
     return command;
   }
 
@@ -73,8 +75,8 @@ public class CommandParser {
    * Takes in a node id and a list of arguments that represent the actuators in an actuator node
    *
    * @param nodeId the id of the node to make SensorActuatorNodeInfo for
-   * @param args a queue of information for the actuators in the node
-   * @return SensorActuatorNodeInfo for the node 
+   * @param args   a queue of information for the actuators in the node
+   * @return SensorActuatorNodeInfo for the node
    */
   public SensorActuatorNodeInfo parseSensorActuatorNodeInfo(int nodeId, ArrayDeque<String> args) {
     SensorActuatorNodeInfo info = new SensorActuatorNodeInfo(nodeId);
@@ -82,8 +84,10 @@ public class CommandParser {
     while (!args.isEmpty()) {
       int actuatorId = Integer.parseInt(args.poll());
       String actuatorType = args.poll();
+      boolean actuatorState = Boolean.parseBoolean(args.poll());
 
       Actuator actuator = new Actuator(actuatorId, actuatorType, nodeId);
+      actuator.set(actuatorState);
       actuator.setListener(this.logic);
       info.addActuator(actuator);
     }
@@ -93,7 +97,7 @@ public class CommandParser {
 
   /**
    * Takes in a queue of arguments that will be parsed in to a list of sensor readings
-   * 
+   *
    * @param args queue
    * @return ArrayList<SensorReading> list of parsed sensor readings
    */

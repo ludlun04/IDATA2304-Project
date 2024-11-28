@@ -101,9 +101,9 @@ public class GreenhouseSimulator {
           //reconnect = false;
 
         } catch (IOException e) {
-            //throw new RuntimeException(e);
-          }
-    }
+          //throw new RuntimeException(e);
+        }
+      }
     }).start();
   }
 
@@ -226,14 +226,15 @@ public class GreenhouseSimulator {
     String response = String.format("add %d", node.getId());
 
     for (Actuator actuator : node.getActuators()) {
-      response = String.format("%s %d %s", response, actuator.getId(), actuator.getType());
+      response = String.format("%s %d %s %b", response, actuator.getId(), actuator.getType(),
+          actuator.isOn());
     }
 
     this.handler.sendEncryptedMessage(response);
   }
 
 
-    /**
+  /**
    * Initialize actuator listeners
    *
    * @param node The node to initialize listeners for
