@@ -65,4 +65,8 @@ public class ControlPanelCommunicationHandler {
       throw new IOException("Communication interrupted");
     }
   }
+
+  public void close() {
+    this.handler.close();
+  }
 }
