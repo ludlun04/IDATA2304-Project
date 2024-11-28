@@ -73,6 +73,11 @@ public class Actuator {
     impacts.put(sensorType, diffWhenActive);
   }
 
+  /**
+   * Get the actuator type.
+   *
+   * @return The type of the actuator
+   */
   public String getType() {
     return type;
   }
