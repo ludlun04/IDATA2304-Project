@@ -3,9 +3,17 @@ package no.ntnu.greenhouse.commands;
 import no.ntnu.greenhouse.GreenhouseSimulator;
 import no.ntnu.greenhouse.SensorActuatorNode;
 
+/**
+ * Command for getting the values of a node
+ */
 public class GetNodeValues extends SimulatorCommand {
   private int nodeId;
 
+  /**
+   * Constructor for GetNodeValues
+   * @param simulator the greenhouse simulator
+   * @param nodeId the id of the node
+   */
   public GetNodeValues(GreenhouseSimulator simulator, int nodeId) {
     super(simulator);
     this.nodeId = nodeId;

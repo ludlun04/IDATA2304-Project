@@ -13,15 +13,22 @@ import no.ntnu.utils.CommunicationHandler;
 import no.ntnu.utils.commands.Command;
 import no.ntnu.utils.commands.EnableEncryption;
 
+/**
+ * Class for parsing commands from messages
+ */
 public class CommandParser {
   private GreenhouseSimulator simulator;
   private CommunicationHandler handler;
 
+  /**
+   * Constructor for CommandParser
+   * @param simulator the greenhouse simulator
+   * @param handler the communication handler
+   */
   public CommandParser(GreenhouseSimulator simulator, CommunicationHandler handler) {
     this.simulator = simulator;
     this.handler = handler;
   }
-
 
   /**
    * Takes in a message and parses out a command based on the contents of the message
