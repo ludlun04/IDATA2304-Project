@@ -34,9 +34,8 @@ public class CommandParser {
    * Takes in a message and parses out a command based on the contents of the message
    *
    * @param message to be parsed
-   * @return returns the coresponding command
+   * @return returns the corresponding command
    * @throws NoSuchCommand    exception if command isn't found or another exception
-   * @throws RuntimeException if something else goes wrong during parsing of the message
    */
   public Command parse(String message) throws IllegalArgumentException {
     Command command = null;

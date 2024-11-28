@@ -89,7 +89,12 @@ public class GreenhouseSimulator {
           }
 
         } catch (IOException e) {
-           Logger.error("Failed to connect to server: " + e.getMessage());
+           Logger.error("Failed to connect to server: " + e.getMessage() +"Retrying in 5 seconds");
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException interruptedException) {
+                Logger.error("Failed to sleep: " + interruptedException.getMessage());
+            }
         }
       }
     }).start();
