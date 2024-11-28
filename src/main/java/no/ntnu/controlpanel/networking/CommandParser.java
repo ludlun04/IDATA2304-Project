@@ -17,6 +17,9 @@ import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.SensorReading;
 import no.ntnu.utils.CommunicationHandler;
 
+/**
+ * Class for parsing commands from messages
+ */
 public class CommandParser {
   private ControlPanelLogic logic;
   private CommunicationHandler handler;

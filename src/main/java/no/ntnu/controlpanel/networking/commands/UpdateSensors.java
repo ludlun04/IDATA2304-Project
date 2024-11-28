@@ -5,6 +5,9 @@ import java.util.List;
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.greenhouse.SensorReading;
 
+/**
+ * Command for updating the sensor data of a node.
+ */
 public class UpdateSensors extends LogicCommand {
   private List<SensorReading> readings;
   private int nodeId;
