@@ -9,7 +9,11 @@ import javax.crypto.SecretKey;
 import no.ntnu.tools.Logger;
 
 /**
- * Class for handling the client
+ * Class for handling communication with a socket.
+ *
+ * <p>Handles reading from and writing to the socket
+ *
+ * <p>Handles optional enabling of encryption of the communication using a given key
  */
 public class CommunicationHandler {
   protected BufferedReader inputReader;
@@ -18,9 +22,9 @@ public class CommunicationHandler {
   private CipherKeyHandler cipherKeyHandler;
 
   /**
-   * Constructor for client handler
+   * Create a communication handler using a given socket.
    *
-   * @param socket socket the client is connected to
+   * @param socket socket to communicate with
    * @throws RuntimeException if constructor fails to open communication with
    *                          socket
    */
@@ -30,12 +34,17 @@ public class CommunicationHandler {
     this.socket = socket;
   }
 
+  /**
+   * Enable encryption of the communication using a given key.
+   *
+   * @param key key to use for encryption
+   */
   public void enableEncryptionwithKey(SecretKey key) {
     this.cipherKeyHandler = new CipherKeyHandler(key);
   }
 
   /**
-   * Sends a message through the associated socket
+   * Sends a message through the associated socket.
    *
    * @param message to be sent
    */
@@ -44,19 +53,19 @@ public class CommunicationHandler {
   }
 
   /**
-   * Sends an encrypted message through the associated socket
+   * Sends an encrypted message through the associated socket.
    */
   public void sendEncryptedMessage(String message) {
 
-    String encryptedMessage = this.cipherKeyHandler.encryptMessageAES(message);
+    String encryptedMessage = this.cipherKeyHandler.encryptMessageAes(message);
     sendMessage(encryptedMessage);
   }
 
   /**
-   * Waits for a message from the client
+   * Waits for a message from the socket. Returns a message if there is one, and null otherwise.
    *
-   * @return message that has been sent from the client or null if the was no
-   * message to get
+   * @return message that has been sent from the socket or null if the was no
+   *     message to get
    */
   public String getMessage() {
     String result = null;
@@ -69,10 +78,10 @@ public class CommunicationHandler {
   }
 
   /**
-   * Waits for a message from the client and decrypts it
+   * Waits for a message from the socket and decrypts it.
    *
    * @return decrypted message that has been sent from the client or null if there
-   * was no message to get
+   *     was no message to get
    */
   public String getDecryptedMessage() {
     String encryptedMessage = getMessage();
@@ -80,10 +89,13 @@ public class CommunicationHandler {
       Logger.error("Received null message");
       return null;
     }
-    String decryptedMessage = this.cipherKeyHandler.decryptMessageAES(encryptedMessage);
+    String decryptedMessage = this.cipherKeyHandler.decryptMessageAes(encryptedMessage);
     return decryptedMessage;
   }
 
+  /**
+   * Closes the communication with the socket.
+   */
   public void close() {
     try {
       this.inputReader.close();
@@ -93,6 +105,11 @@ public class CommunicationHandler {
     }
   }
 
+  /**
+   * Get the socket associated with the communication handler.
+   *
+   * @return the socket associated with the communication handler
+   */
   public Socket getSocket() {
     return this.socket;
   }
