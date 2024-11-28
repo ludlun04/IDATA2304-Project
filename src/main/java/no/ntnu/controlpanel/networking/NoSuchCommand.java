@@ -1,3 +1,7 @@
 package no.ntnu.controlpanel.networking;
 
-public class NoSuchCommand extends RuntimeException{}
+/**
+ * Exception used when a command is not defined.
+ */
+public class NoSuchCommand extends RuntimeException {
+}
