@@ -109,6 +109,7 @@ public class GreenhouseSimulator {
 
   private boolean handleMessage(String message) {
     String args[] = message.split(" ");
+    //TODO: Move all stuff here to commandparser, also change the classes and methods to get a nodeId instead of a Node. Getting a node might lead to problems.
     boolean shouldClose = fake;
     try {
       switch (args[0]) {
@@ -152,54 +153,37 @@ public class GreenhouseSimulator {
     return shouldClose;
   }
 
-  private void setupEncryption(String keyEncoded) {
-
-    byte[] keyDecoded = Base64.getDecoder().decode(keyEncoded);
-    SecretKey key = new SecretKeySpec(keyDecoded, "AES");
+  public void setupEncryption(SecretKey key) {
     this.handler.enableEncryptionwithKey(key);
     this.handler.sendEncryptedMessage("OK");
   }
 
   /**
    * Add an actuator to a node.
-   *
-   * @param args The arguments for values.
    */
-  private void addActuatorToNode(String[] args) {
-    int nodeId = Integer.parseInt(args[2]);
-    Actuator actuator = new Actuator(args[3], nodeId);
+  public void addActuatorToNode(int nodeId, Actuator actuator) {
     this.getNode(nodeId).addActuator(actuator);
   }
 
   /**
    * Add a sensor to a node.
-   *
-   * @param args The arguments for values.
    */
-  private void addSensorToNode(String[] args) {
-    Sensor sensor = new Sensor(args[3], Integer.parseInt(args[4]),
-        Integer.parseInt(args[5]), Integer.parseInt(args[6]), args[7]);
-    this.getNode(Integer.parseInt(args[2]))
-        .addSensors(sensor, Integer.parseInt(args[8]));
+  public void addSensorToNode(int nodeId, Sensor sensor, int amount) {
+    this.getNode(nodeId).addSensors(sensor, amount);
   }
 
   /**
    * Set the actuator value.
-   *
-   * @param args The arguments for values.
    */
-  private void setActuatorValue(String[] args) {
-    this.getNode(Integer.parseInt(args[1])).getActuators()
-        .get(Integer.parseInt(args[2])).set(Boolean.parseBoolean(args[3]));
+  public void setActuatorState(int nodeId, int actuatorId, boolean state) {
+    this.getNode(nodeId).getActuators().get(actuatorId).set(state);
   }
 
   /**
    * Get the node values.
-   *
-   * @param args The arguments for values.
    */
-  private void getNodeValues(String[] args) {
-    for (Sensor sensor : this.getNode(Integer.parseInt(args[1])).getSensors()) {
+  public void getNodeValues(SensorActuatorNode node) {
+    for (Sensor sensor : node.getSensors()) {
       this.handler.sendEncryptedMessage("" + sensor.getReading().getValue());
     }
   }
