@@ -21,10 +21,18 @@ public class MainGreenhouseGuiWindow extends Scene {
   public static final int WIDTH = 300;
   public static final int HEIGHT = 300;
 
+  /**
+   * Create the main window for the greenhouse simulator.
+   */
   public MainGreenhouseGuiWindow() {
     super(createMainContent(), WIDTH, HEIGHT);
   }
 
+  /**
+   * Create the main content of the window.
+   *
+   * @return The main content of the window
+   */
   private static Parent createMainContent() {
     VBox container = new VBox(createInfoLabel(), createMasterImage(), createCopyrightNotice());
     container.setPadding(new Insets(20));
@@ -33,6 +41,11 @@ public class MainGreenhouseGuiWindow extends Scene {
     return container;
   }
 
+  /**
+   * Create an information label.
+   *
+   * @return The information label
+   */
   private static Label createInfoLabel() {
     Label l = new Label("Close this window to stop the whole simulation");
     l.setWrapText(true);
@@ -40,6 +53,11 @@ public class MainGreenhouseGuiWindow extends Scene {
     return l;
   }
 
+  /**
+   * Create a label with the copyright notice.
+   *
+   * @return The label with the copyright notice
+   */
   private static Node createCopyrightNotice() {
     Label l = new Label("Source NTNU");
     l.setFont(Font.font(10));

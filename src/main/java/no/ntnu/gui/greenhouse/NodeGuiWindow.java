@@ -40,6 +40,9 @@ public class NodeGuiWindow extends Stage implements SensorListener, ActuatorList
     setPositionAndSize();
   }
 
+  /**
+   * Set the position and size of the window.
+   */
   private void setPositionAndSize() {
     setX((node.getId() - 1) * HORIZONTAL_OFFSET);
     setY(node.getId() * VERTICAL_OFFSET);
@@ -47,24 +50,40 @@ public class NodeGuiWindow extends Stage implements SensorListener, ActuatorList
     setMinHeight(WINDOW_WIDTH);
   }
 
-
+  /**
+   * Initialize listeners for the node.
+   *
+   * @param node The node to listen to
+   */
   private void initializeListeners(SensorActuatorNode node) {
     setOnCloseRequest(windowEvent -> shutDownNode());
     node.addSensorListener(this);
     node.addActuatorListener(this);
   }
 
+  /**
+   * Shut down the node.
+   */
   private void shutDownNode() {
     node.stop();
   }
 
+  /**
+   * Create the content of the window.
+   *
+   * @return The content of the window
+   */
   private Parent createContent() {
     actuatorPane = new ActuatorPane(node.getActuators());
     sensorPane = new SensorPane(node.getSensors());
     return new VBox(sensorPane, actuatorPane);
   }
 
-
+  /**
+   * Update the sensor values in the GUI using values from a list of sensors.
+   *
+   * @param sensors A list of sensors
+   */
   @Override
   public void sensorsUpdated(List<Sensor> sensors) {
     if (sensorPane != null) {
@@ -72,6 +91,12 @@ public class NodeGuiWindow extends Stage implements SensorListener, ActuatorList
     }
   }
 
+  /**
+   * Update the actuator values in the GUI using a given actuator.
+   *
+   * @param nodeId   ID of the node on which this actuator is placed
+   * @param actuator The actuator that has changed its state
+   */
   @Override
   public void actuatorUpdated(int nodeId, Actuator actuator) {
     if (actuatorPane != null) {
