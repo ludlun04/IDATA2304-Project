@@ -1,15 +1,15 @@
 package no.ntnu.server;
 
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Base64;
+import javax.crypto.SecretKey;
 import no.ntnu.server.networking.ControlPanelHandler;
 import no.ntnu.server.networking.GreenHouseHandler;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CipherKeyHandler;
 import no.ntnu.utils.CommunicationHandler;
 
-import javax.crypto.SecretKey;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Base64;
 
 /**
  * Server for the greenhouse system.
@@ -101,7 +101,8 @@ public class GreenHouseServer extends Server {
    * @param newHandler     handler to execute logic for
    * @param keyEncoded     encoded key for the handler
    */
-  private void executeHandlerLogic(String initialMessage, CommunicationHandler newHandler, String keyEncoded) {
+  private void executeHandlerLogic(String initialMessage, CommunicationHandler newHandler,
+                                   String keyEncoded) {
     String encryptionResponse;
     switch (initialMessage) {
       case "I am controlpanel":

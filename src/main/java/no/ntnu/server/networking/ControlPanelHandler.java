@@ -4,7 +4,7 @@ import no.ntnu.server.GreenHouseServer;
 import no.ntnu.utils.CommunicationHandler;
 
 /**
- * Handles TCP communication between a server and control panel on the server side.
+ * Handles TCP communication between a server and a control panel on the server side.
  */
 public class ControlPanelHandler extends ServerSideHandler {
 
@@ -19,7 +19,7 @@ public class ControlPanelHandler extends ServerSideHandler {
   }
 
   /**
-   * Handles a message. Sends the message to all control panels.
+   * Handles a message. Sends the message to the greenhouse.
    *
    * @param message The message to handle.
    */

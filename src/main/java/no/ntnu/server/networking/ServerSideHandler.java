@@ -3,6 +3,11 @@ package no.ntnu.server.networking;
 import no.ntnu.server.GreenHouseServer;
 import no.ntnu.utils.CommunicationHandler;
 
+/**
+ * Handles TCP communication between a server and a client on the server side.
+ *
+ * <p>Extend this class to create a handler for a specific client type.</p>
+ */
 public abstract class ServerSideHandler {
 
   private CommunicationHandler communicationHandler;
@@ -29,7 +34,7 @@ public abstract class ServerSideHandler {
    * @param message The message to send.
    */
   public void sendMessage(String message) {
-    this.communicationHandler.sendEncryptedMessage(message);
+    this.communicationHandler.sendMessage(message);
   }
 
   /**

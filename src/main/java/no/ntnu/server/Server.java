@@ -3,19 +3,17 @@ package no.ntnu.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-
 import no.ntnu.tools.Logger;
 
 /**
- * Class representing a server accepting incoming connection requests
+ * Class representing a server accepting incoming connection requests. The server is abstract and
+ * must be extended to implement the logic for handling incoming connections.
  */
 public abstract class Server {
   private ServerSocket serverSocket;
 
   /**
-   * Constructor of server
+   * Creates a new server using the specified port.
    *
    * @param port port to listen for clients
    */
@@ -29,10 +27,9 @@ public abstract class Server {
   }
 
   /**
-   * Runs the server
-   * <p>
-   * Waits for clients and listens to commands.
-   * </p>
+   * Runs the server.
+   *
+   * <p>Waits for clients and listens to commands.
    */
   public void run() {
     boolean finished = false;
@@ -49,5 +46,10 @@ public abstract class Server {
     }
   }
 
+  /**
+   * Method to be called when a new socket is connected.
+   *
+   * @param socket the socket that is connected
+   */
   protected abstract void socketConnected(Socket socket);
 }
