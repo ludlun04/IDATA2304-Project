@@ -12,10 +12,20 @@ public class SensorActuatorNodeInfo {
   private final int nodeId;
   private final ActuatorCollection actuators = new ActuatorCollection();
 
+  /**
+   * Create a new sensor/actuator node info.
+   *
+   * @param nodeId The ID of the node
+   */
   public SensorActuatorNodeInfo(int nodeId) {
     this.nodeId = nodeId;
   }
 
+  /**
+   * Add an actuator to the sensor/actuator node.
+   *
+   * @param actuator The actuator to add
+   */
   public void addActuator(Actuator actuator) {
     actuators.add(actuator);
   }

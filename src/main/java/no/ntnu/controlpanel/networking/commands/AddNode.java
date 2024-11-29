@@ -9,11 +9,20 @@ import no.ntnu.controlpanel.SensorActuatorNodeInfo;
 public class AddNode extends LogicCommand {
   private SensorActuatorNodeInfo sensorActuatorNodeInfo;
 
+  /**
+   * Create a new add node command.
+   *
+   * @param logic The control panel logic.
+   * @param info The information about the node to add.
+   */
   public AddNode(ControlPanelLogic logic, SensorActuatorNodeInfo info) {
     super(logic);
     this.sensorActuatorNodeInfo = info;
   }
 
+  /**
+   * Execute the command.
+   */
   @Override
   public void execute() {
     this.logic.onNodeAdded(this.sensorActuatorNodeInfo);

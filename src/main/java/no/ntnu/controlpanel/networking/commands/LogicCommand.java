@@ -9,6 +9,11 @@ import no.ntnu.utils.commands.Command;
 public abstract class LogicCommand extends Command {
   protected ControlPanelLogic logic;
 
+  /**
+   * Create a new logic command.
+   *
+   * @param logic The control panel logic.
+   */
   public LogicCommand(ControlPanelLogic logic) {
     this.logic = logic;
   }

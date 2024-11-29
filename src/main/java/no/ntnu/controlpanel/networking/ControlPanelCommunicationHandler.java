@@ -8,10 +8,10 @@ import java.io.IOException;
 
 public class ControlPanelCommunicationHandler {
 
-  private CommandParser commandParser;
+  private ControlPanelCommandParser commandParser;
   private CommunicationHandler handler;
 
-  public ControlPanelCommunicationHandler(CommunicationHandler handler, CommandParser commandParser) {
+  public ControlPanelCommunicationHandler(CommunicationHandler handler, ControlPanelCommandParser commandParser) {
     this.handler = handler;
     this.commandParser = commandParser;
   }

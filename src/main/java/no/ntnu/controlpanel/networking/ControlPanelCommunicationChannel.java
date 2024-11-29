@@ -118,7 +118,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
   private void createHandler() throws IOException {
     CommunicationHandler communicationHandler = new CommunicationHandler(new Socket("127.0.0.1", 8765));
     this.handler = new ControlPanelCommunicationHandler(communicationHandler,
-            new CommandParser(logic, communicationHandler));
+            new ControlPanelCommandParser(logic, communicationHandler));
 
     performHandshake();
     this.handler.handleMessage(); // needed to establish encryption
