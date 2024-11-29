@@ -18,44 +18,34 @@ distributed application.
 
 ## The underlying transport protocol
 
-TODO - what transport-layer protocol do you use? TCP? UDP? What port number(s)? Why did you choose this transport layer protocol?
-
 We decided to go for TCP as our transport-layer protocol. The reason behind this is that a tcp socket connection allows for two way communication between a server and connected clients. This makes it easier to have real time updates as the state of a greenhouse changes.
 
 ## The architecture
 
-TODO - show the general architecture of your network. Which part is a server? Who are clients? 
-Do you have one or several servers? Perhaps include a picture here. 
-
 The architecture of our application is a greenhouseNode, a server and multiple control panels. Both the greenhouseNode and the control panels are clients of the server.
 
+The greenhouseNodes holds multiple sensorActuatorNodes, so at the end of the day many control-panels can talk to many sensorActuatorNodes
+
+![architecture](./images/GreenHouse-Server-ControlPanel.png)
 ## The flow of information and events
 
-TODO - describe what each network node does and when. Some periodic events? Some reaction on 
-incoming packets? Perhaps split into several subsections, where each subsection describes one 
-node type (For example: one subsection for sensor/actuator nodes, one for control panel nodes).
-
 GreenhouseNode:
-Once a greenhouseNode starts it will connect to the server and start sending periodic updates as new information gets read in from its sensors. 
+Once a greenhouseNode starts it will connect to the server and start sending periodic updates as new information gets read in from its sensorActuatorNodes. 
 
 Server:
-The server works as a binder between the greenhouse and the controlpanels. It's main goal is to recieve information from the greenhouse node and update the connected control panel nodes as needed
+The server works as a binder between the greenhouse and the controlpanels. It's main goal is to recieve information from the greenhouse node and update the connected control panel nodes as needed. It also handels the other way around, when a control-panel sends to change the state of an actuator
 
 Control panel:
-Control panels are started up individualy and automatically connects to the server. The get updates periodically from the server which they display in a GUI
+Control panels are started up individualy and automatically connects to the server. They get updates periodically from the server which they display in a GUI. They also send command packets to switch actuators when ever the client actions for a switch.
 
 
 ## Connection and state
 
-TODO - is your communication protocol connection-oriented or connection-less? Is it stateful or 
-stateless? 
 We use a stateless connection-oriented approach. This allows us to get two way communication from and to both control panels and the greenhouse node from the server.
 
 ## Types, constants
 
-TODO - Do you have some specific value types you use in several messages? They you can describe 
-them here.
-
+A common value type we use across many of our messages is the nodeId. This informs the recieving party for which node to update the information display of or to change.
 
 ## Message format
 
@@ -63,12 +53,6 @@ TODO - describe the general format of all messages. Then describe specific forma
 message type in your protocol.
 
 Every message contains a commandword at the start, this tells the receiver what it should do and if it should send data as a response. 
-
-### Error messages
-
-TODO - describe the possible error messages that nodes can send in your system.
-
-We have no errors, there is never an error :smile:
 
 ## An example scenario
 
@@ -111,7 +95,5 @@ Actuator changes on a sensorActuatorNode
 
 ## Reliability and security
 
-TODO - describe the reliability and security mechanisms your solution supports.
-
-Reliability comes from TCP reliability.
-Packages are encrypted with symetric keys.
+Reliability comes from TCP reliability, we also have functionality to reconnect the sockets if they at any point loose connection.
+Packages are encrypted with symetric keys so that they cannot be read by a unwanted third party (Man in the middle attack).
