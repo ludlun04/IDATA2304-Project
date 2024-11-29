@@ -76,7 +76,6 @@ public class GreenhouseSimulator {
       boolean reconnect = true;
       while (reconnect) {
         try (Socket socket = new Socket("127.0.0.1", 8765)) {
-          System.out.println("WE MADE A SOCKET!!!!!!");
           CommunicationHandler handler = new CommunicationHandler(socket);
           this.handler = new GreenhouseCommunicationHandler(handler, new CommandParser(this, handler));
           handler.sendMessage("I am greenhouse");
@@ -89,7 +88,7 @@ public class GreenhouseSimulator {
           }
 
         } catch (IOException e) {
-           Logger.error("Failed to connect to server: " + e.getMessage() +"Retrying in 5 seconds");
+           Logger.error("Failed to connect to server: " + e.getMessage() +". Retrying in 5 seconds");
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException interruptedException) {

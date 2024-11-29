@@ -100,8 +100,10 @@ public class CommunicationHandler {
     try {
       this.inputReader.close();
       this.outputWriter.close();
+      this.socket.close();
+      Logger.info("Closed communication with socket ");
     } catch (IOException e) {
-      System.err.println(e.getMessage());
+      Logger.error(e.getMessage());
     }
   }
 
