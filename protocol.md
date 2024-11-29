@@ -10,7 +10,9 @@ distributed application.
 * Actuator - a device which can influence the environment. Examples: a fan, a window opener/closer,
   door opener/closer, heater.
 * Sensor and actuator node - a computer which has direct access to a set of sensors, a set of
-  actuators and is connected to the Internet.
+  actuators. 
+* Greenhouse node - a device in the greenhouse that is connected to the sensor actuator nodes and the internet.
+* Greenhouse server - a main server that all client nodes connect to, bot control-panel nodes and the greenhouse node.
 * Control-panel node - a device connected to the Internet which visualizes status of sensor and
   actuator nodes and sends control commands to them.
 * Graphical User Interface (GUI) - A graphical interface where users of the system can interact with
@@ -48,9 +50,6 @@ We use a stateless connection-oriented approach. This allows us to get two way c
 A common value type we use across many of our messages is the nodeId. This informs the recieving party for which node to update the information display of or to change.
 
 ## Message format
-
-TODO - describe the general format of all messages. Then describe specific format for each 
-message type in your protocol.
 
 Every message contains a commandword at the start, this tells the receiver what it should do and if it should send data as a response. 
 
@@ -95,5 +94,8 @@ Actuator changes on a sensorActuatorNode
 
 ## Reliability and security
 
-Reliability comes from TCP reliability, we also have functionality to reconnect the sockets if they at any point loose connection.
+### Reliablitiy
+Package reliability comes from TCP reliability, we also have functionality to reconnect the sockets if they at any point loose connection.
+
+### Security
 Packages are encrypted with symetric keys so that they cannot be read by a unwanted third party (Man in the middle attack).
