@@ -1,15 +1,15 @@
 package no.ntnu.greenhouse;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.Socket;
-import java.util.*;
-
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import javax.crypto.SecretKey;
 import no.ntnu.listeners.greenhouse.NodeStateListener;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Application entrypoint - a simulator for a greenhouse.
@@ -19,7 +19,7 @@ public class GreenhouseSimulator {
 
   private final List<PeriodicSwitch> periodicSwitches = new LinkedList<>();
   private final boolean fake;
-  private CommunicationHandler handler;
+  private GreenhouseCommunicationHandler handler;
 
   /**
    * Create a greenhouse simulator.
@@ -72,134 +72,66 @@ public class GreenhouseSimulator {
   }
 
   private void initiateRealCommunication() {
-    // TODO - here you can set up the TCP or UDP communication
+    int sleepTime = 5000;
     new Thread(() -> {
       boolean reconnect = true;
       while (reconnect) {
+        Logger.info("Attempting to connect...");
         try (Socket socket = new Socket("127.0.0.1", 8765)) {
-          System.out.println("WE MADE A SOCKET!!!!!!");
           CommunicationHandler handler = new CommunicationHandler(socket);
-          this.handler = handler;
+          this.handler = new GreenhouseCommunicationHandler(handler,
+              new GreenhouseCommandParser(this, handler));
           handler.sendMessage("I am greenhouse");
 
-          // initializeSensorListeners(node);
-          // initializeActuatorListeners(node);
-
-          handleMessage(this.handler.getMessage()); //first message not encrypted
+          this.handler.handleMessage(); //first message not encrypted
 
           boolean reachedEnd = false;
           while (!reachedEnd) {
-            String message = handler.getDecryptedMessage();
-
-            if (message == null) {
-              reachedEnd = true;
-            } else {
-              reachedEnd = handleMessage(message);
-            }
+            reachedEnd = this.handler.handleEncryptedMessage();
           }
 
-          //reconnect = false;
-
         } catch (IOException e) {
-          //throw new RuntimeException(e);
+          try {
+            Thread.sleep(sleepTime);
+          } catch (InterruptedException interruptedException) {
+            Logger.error("Failed to sleep: " + interruptedException.getMessage());
+          }
         }
       }
     }).start();
   }
 
-  private boolean handleMessage(String message) {
-    String args[] = message.split(" ");
-    boolean shouldClose = fake;
-    try {
-      switch (args[0]) {
-        case "Encrypt":
-          setupEncryption(args[1]);
-          break;
-        case "setupNodes":
-          setupNodes();
-          break;
-        case "startDataTransfer":
-          startDataTransfer();
-          break;
-        case "get":
-          getNodeValues(args);
-          break;
-        case "set":
-          setActuatorValue(args);
-          break;
-        case "add":
-          switch (args[1]) {
-            case "sensor":
-              addSensorToNode(args);
-              break;
-            case "actuator":
-              addActuatorToNode(args);
-              break;
-          }
-        case "close":
-          shouldClose = true;
-          break;
-        default:
-          Logger.error("Unknown command: " + args[0]);
-          break;
-      }
-    } catch (IllegalArgumentException e) {
-      Logger.error("Handling messages failed. " + e.getMessage());
-    } catch (IndexOutOfBoundsException e) {
-      Logger.error("Missing command parameters. " + e.getMessage());
-    }
-
-    return shouldClose;
-  }
-
-  private void setupEncryption(String keyEncoded) {
-
-    byte[] keyDecoded = Base64.getDecoder().decode(keyEncoded);
-    SecretKey key = new SecretKeySpec(keyDecoded, "AES");
+  public void setupEncryption(SecretKey key) {
     this.handler.enableEncryptionwithKey(key);
     this.handler.sendEncryptedMessage("OK");
   }
 
   /**
    * Add an actuator to a node.
-   *
-   * @param args The arguments for values.
    */
-  private void addActuatorToNode(String[] args) {
-    int nodeId = Integer.parseInt(args[2]);
-    Actuator actuator = new Actuator(args[3], nodeId);
+  public void addActuatorToNode(int nodeId, Actuator actuator) {
     this.getNode(nodeId).addActuator(actuator);
   }
 
   /**
    * Add a sensor to a node.
-   *
-   * @param args The arguments for values.
    */
-  private void addSensorToNode(String[] args) {
-    Sensor sensor = new Sensor(args[3], Integer.parseInt(args[4]),
-        Integer.parseInt(args[5]), Integer.parseInt(args[6]), args[7]);
-    this.getNode(Integer.parseInt(args[2]))
-        .addSensors(sensor, Integer.parseInt(args[8]));
+  public void addSensorToNode(int nodeId, Sensor sensor, int amount) {
+    this.getNode(nodeId).addSensors(sensor, amount);
   }
 
   /**
    * Set the actuator value.
-   *
-   * @param args The arguments for values.
    */
-  private void setActuatorValue(String[] args) {
-    this.getNode(Integer.parseInt(args[1])).getActuators()
-        .get(Integer.parseInt(args[2])).set(Boolean.parseBoolean(args[3]));
+  public void setActuatorState(int nodeId, int actuatorId, boolean state) {
+    this.getNode(nodeId).getActuators().get(actuatorId).set(state);
   }
 
   /**
    * Get the node values.
-   *
-   * @param args The arguments for values.
    */
-  private void getNodeValues(String[] args) {
-    for (Sensor sensor : this.getNode(Integer.parseInt(args[1])).getSensors()) {
+  public void getNodeValues(SensorActuatorNode node) {
+    for (Sensor sensor : node.getSensors()) {
       this.handler.sendEncryptedMessage("" + sensor.getReading().getValue());
     }
   }

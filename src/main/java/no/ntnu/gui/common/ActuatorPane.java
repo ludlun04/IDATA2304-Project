@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-// import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.HBox;
@@ -40,34 +39,36 @@ public class ActuatorPane extends TitledPane {
     GuiTools.stretchVertically(this);
   }
 
+  /**
+   * Add actuator controls to the parent pane.
+   *
+   * @param actuators The actuators to add
+   * @param parent    The parent pane to add the controls to
+   */
   private void addActuatorControls(ActuatorCollection actuators, Pane parent) {
     actuators.forEach(actuator ->
         parent.getChildren().add(createActuatorGui(actuator))
     );
   }
 
+  /**
+   * Create a GUI part for an actuator in the form of an HBox.
+   *
+   * @param actuator The actuator to create the GUI part for
+   * @return The GUI part
+   */
   private Node createActuatorGui(Actuator actuator) {
     HBox actuatorGui = new HBox(createActuatorLabel(actuator), createActuatorButton(actuator));
     actuatorGui.setSpacing(5);
     return actuatorGui;
   }
 
-
-  // private CheckBox createActuatorCheckbox(Actuator actuator) {
-  //   CheckBox checkbox = new CheckBox();
-  //   SimpleBooleanProperty isSelected = new SimpleBooleanProperty(actuator.isOn());
-  //   actuatorActive.put(actuator, isSelected);
-  //   checkbox.selectedProperty().bindBidirectional(isSelected);
-  //   checkbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-  //     if (newValue != null && newValue) {
-  //       actuator.turnOn();
-  //     } else {
-  //       actuator.turnOff();
-  //     }
-  //   });
-  //   return checkbox;
-  // }
-
+  /**
+   * Create a button for an actuator.
+   *
+   * @param actuator The actuator to create a button for
+   * @return The button
+   */
   private Button createActuatorButton(Actuator actuator) {
     Button button = new Button();
     SimpleBooleanProperty isSelected = new SimpleBooleanProperty(actuator.isOn());
@@ -80,6 +81,12 @@ public class ActuatorPane extends TitledPane {
     return button;
   }
 
+  /**
+   * Create a label for an actuator.
+   *
+   * @param actuator The actuator to create a label for
+   * @return The label
+   */
   private Label createActuatorLabel(Actuator actuator) {
     SimpleStringProperty props = new SimpleStringProperty(generateActuatorText(actuator));
     actuatorValue.put(actuator, props);
@@ -88,6 +95,12 @@ public class ActuatorPane extends TitledPane {
     return label;
   }
 
+  /**
+   * Generate a text representation of an actuator.
+   *
+   * @param actuator The actuator to generate text for
+   * @return The text representation
+   */
   private String generateActuatorText(Actuator actuator) {
     String onOff = actuator.isOn() ? "ON" : "off";
     return actuator.getType() + ": " + onOff;

@@ -5,17 +5,31 @@ import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import no.ntnu.tools.Logger;
 
+/**
+ * Class for handling encryption and decryption of messages using AES.
+ *
+ * <p>Uses an AES key for encryption and decryption.
+ */
 public class CipherKeyHandler {
-  private SecretKey aesKey;
+  private final SecretKey aesKey;
 
+  /**
+   * Creates a new CipherKeyHandler with the given AES key.
+   *
+   * @param aesKey The AES key to use for encryption and decryption
+   */
   public CipherKeyHandler(SecretKey aesKey) {
     this.aesKey = aesKey;
   }
 
-  public static SecretKey getNewRandomAESKey() {
+  /**
+   * Get a new random AES key.
+   *
+   * @return A new random AES key
+   */
+  public static SecretKey getNewRandomAesKey() {
     SecretKey secretKey = null;
     try {
       KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
@@ -27,7 +41,13 @@ public class CipherKeyHandler {
     return secretKey;
   }
 
-  public String encryptMessageAES(String message) {
+  /**
+   * Get an encrypted message from a given plaintext message.
+   *
+   * @param message The message to encrypt
+   * @return The encrypted message
+   */
+  public String encryptMessageAes(String message) {
     String encryptedMessage = null;
     try {
       Cipher cipher = Cipher.getInstance("AES");
@@ -40,7 +60,13 @@ public class CipherKeyHandler {
     return encryptedMessage;
   }
 
-  public String decryptMessageAES(String encryptedMessage) {
+  /**
+   * Get a decrypted message from a given encrypted message.
+   *
+   * @param encryptedMessage The message to decrypt
+   * @return The decrypted message
+   */
+  public String decryptMessageAes(String encryptedMessage) {
     String decryptedMessage = null;
     try {
       Cipher cipher = Cipher.getInstance("AES");

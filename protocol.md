@@ -1,6 +1,6 @@
 # Communication protocol
 
-This document describes the protocol used for communication between the different nodes of the
+This document describes the protocol used for communication between the server and different nodes of the
 distributed application.
 
 ## Terminology
@@ -20,26 +20,94 @@ distributed application.
 
 ## The underlying transport protocol
 
-We decided to go for TCP as our transport-layer protocol. The reason behind this is that a tcp socket connection allows for two way communication between a server and connected clients. This makes it easier to have real time updates as the state of a greenhouse changes.
+### Transport-layer protocol
+We decided use TCP as our transport-layer protocol.
+The reason behind this is that a tcp socket connection allows for connection-oriented communication.
+This means that we can ensure that all messages are received in the correct order,
+and that no messages are lost.
+The main advantage of using UDP is transmission speed, but since we are not sending large
+amounts of data, but this is not needed in our case.
+
+### Port number
+We chose to use port 8765 for our server. This port is in the registered ports range (1024-49151), 
+and from our research it is not used by any other common services. 
+Therefore, it is good choice for our server.
 
 ## The architecture
 
-The architecture of our application is a greenhouseNode, a server and multiple control panels. Both the greenhouseNode and the control panels are clients of the server.
+### Components
+The architecture of our network consists of a greenhouse, a server and one or many control panels.
+Both the greenhouse and the control panels are clients of the server.
+
+#### Greenhouse
+There is a single greenhouse, which contains a number of sensor and actuator nodes.
+
+#### Control panel
+There can be multiple control panels, which are used to control the actuators on the sensor nodes,
+as well as to display the sensor data.
+
+#### Server
+There is a single server, which is used to connect the greenhouse and the control panels. It uses
+a combination of unicast and broadcast messages to allow for communication between the nodes.
+
+### Robustness
+These components are structured in such a way that connections can be established and terminated in
+any order any amount of times. This makes the application robust to network failures and
+all possible user actions.
 
 The greenhouseNodes holds multiple sensorActuatorNodes, so at the end of the day many control-panels can talk to many sensorActuatorNodes
 
 ![architecture](./images/GreenHouse-Server-ControlPanel.png)
 ## The flow of information and events
 
-GreenhouseNode:
-Once a greenhouseNode starts it will connect to the server and start sending periodic updates as new information gets read in from its sensorActuatorNodes. 
+### Server
+Once the server starts, it will open a TCP socket on the decided port and wait for clients to
+connect.
+When a client connects, the server will see what type of client it is (Greenhouse or Control Panel).
+The server stores one instance of the greenhouse and a list of all connected control panels. These
+are updated as clients connect and disconnect. A new thread is also created to manage each active
+client.
 
-Server:
-The server works as a binder between the greenhouse and the controlpanels. It's main goal is to recieve information from the greenhouse node and update the connected control panel nodes as needed. It also handels the other way around, when a control-panel sends to change the state of an actuator
+The server will then send the client an unencrypted message, which contains a random symmetric key
+unique for this connection. The client will then encrypt all future messages using this key. The
+encryption is tested by having the client send an encrypted message 'OK' to the server,
+which the server decrypts. If the server receives 'OK', the encryption is successful, otherwise
+the connection is terminated.
+
+From now on, for as long as the connection is open, the server will listen for messages from the
+client. If the client is the greenhouse, the server will multicast the message to all connected
+control panels. If the client is a control panel, the server will unicast the message to the
+greenhouse.
+
+### Greenhouse
+Once the Greenhouse starts it will attempt to connect to the server. If the server is offline, or
+for some reason the connection fails, the greenhouse will keep trying to connect until it
+succeeds.
+
+Once a TCP connection is established, the greenhouse will let the server know what type of client
+it is. The server will then send a single unencrypted message with a symmetric key.
+The greenhouse will then encrypt all future messages using this key.
+
+From this point on, the greenhouse will periodically send sensor data to the server.
+The greenhouse also listens for messages from the server, which can be actuator commands. It will
+then change the state of the actuator accordingly.
 
 Control panel:
-Control panels are started up individualy and automatically connects to the server. They get updates periodically from the server which they display in a GUI. They also send command packets to switch actuators when ever the client actions for a switch.
+Control panels are started up individualy and automatically connects to the server. The get updates periodically from the server which they display in a GUI
 
+### Control panel
+In similar fashion to the greenhouse, once a control panel starts it will attempt to connect to the
+server.
+If the server is offline, or for some reason the connection fails, the control panel will keep
+trying to connect until it succeeds.
+
+Once a TCP connection is established, the control panel will let the server know what type of client
+it is. The server will then send a single unencrypted message with a symmetric key.
+The control panel will then encrypt all future messages using this key.
+
+From this point on, the control panel will listen for messages from the server, which can be sensor
+data or actuator updates. The control panel will then display this data to the user. When the user
+changes the state of an actuator, the control panel will send the actuator update to the server.
 
 ## Connection and state
 
@@ -52,6 +120,12 @@ A common value type we use across many of our messages is the nodeId. This infor
 ## Message format
 
 Every message contains a commandword at the start, this tells the receiver what it should do and if it should send data as a response. 
+
+### Error messages
+
+In our system nodes do not send error messages over the network. If a node encounters an error, 
+it will attempt to reconnect to the server if possible. If a non-connection-oriented error occurs,
+such as in parsing of a message, the error gets logged for debugging purposes.
 
 ## An example scenario
 
@@ -98,4 +172,4 @@ Actuator changes on a sensorActuatorNode
 Package reliability comes from TCP reliability, we also have functionality to reconnect the sockets if they at any point loose connection.
 
 ### Security
-Packages are encrypted with symetric keys so that they cannot be read by a unwanted third party (Man in the middle attack).
+Packages are encrypted with symmetric keys so that they cannot be read by a unwanted third party (Man in the middle attack).

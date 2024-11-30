@@ -3,38 +3,28 @@ package no.ntnu.server.networking;
 import no.ntnu.server.GreenHouseServer;
 import no.ntnu.utils.CommunicationHandler;
 
-public class GreenHouseHandler {
-  private CommunicationHandler communicationHandler;
-  private GreenHouseServer server;
-  private boolean isConnected;
+/**
+ * Handles TCP communication between a server and greenhouse on the server side.
+ */
+public class GreenHouseHandler extends ServerSideHandler {
 
+  /**
+   * Creates a new instance of the GreenHouseHandler.
+   *
+   * @param communicationHandler The communication handler to use.
+   * @param server               The server to use.
+   */
   public GreenHouseHandler(CommunicationHandler communicationHandler, GreenHouseServer server) {
-    this.communicationHandler = communicationHandler;
-    this.server = server;
+    super(communicationHandler, server);
   }
 
-  public void sendMessage(String message) {
-    this.communicationHandler.sendEncryptedMessage(message);
-  }
-
-  public void sendEncryptedMessage(String message) {
-    this.communicationHandler.sendEncryptedMessage(message);
-  }
-
-  public void start() {
-    this.isConnected = true;
-    while (isConnected) {
-      String message = this.communicationHandler.getDecryptedMessage();
-
-      if (message == null) {
-        this.isConnected = false;
-      } else {
-        this.server.sendToAllClients(message);
-      }
-    }
-  }
-
-  public void stop() {
-    this.isConnected = false;
+  /**
+   * Handles a message. Sends the message to all control panels.
+   *
+   * @param message The message to handle.
+   */
+  @Override
+  protected void handleMessage(String message) {
+    this.getServer().sendToAllControlPanels(message);
   }
 }

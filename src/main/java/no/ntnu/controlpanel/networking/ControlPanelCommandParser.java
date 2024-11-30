@@ -2,53 +2,47 @@ package no.ntnu.controlpanel.networking;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.List;
-
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.SensorActuatorNodeInfo;
 import no.ntnu.controlpanel.networking.commands.AddNode;
 import no.ntnu.controlpanel.networking.commands.RemoveNode;
 import no.ntnu.controlpanel.networking.commands.UpdateActuator;
 import no.ntnu.controlpanel.networking.commands.UpdateSensors;
-import no.ntnu.utils.commands.Command;
-
-import no.ntnu.utils.commands.EnableEncryption;
 import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.SensorReading;
+import no.ntnu.utils.CommandParser;
 import no.ntnu.utils.CommunicationHandler;
+import no.ntnu.utils.commands.Command;
+import no.ntnu.utils.commands.EnableEncryption;
 
-public class CommandParser {
-  private ControlPanelLogic logic;
-  private CommunicationHandler handler;
-
-  public CommandParser(ControlPanelLogic logic, CommunicationHandler handler) {
-    this.logic = logic;
-    this.handler = handler;
-  }
+/**
+ * Class for parsing commands from messages.
+ */
+public class ControlPanelCommandParser extends CommandParser {
+  private final ControlPanelLogic logic;
 
   /**
-   * Takes in a message and parses out a command based on the contents of the message
+   * Create a new control panel command parser.
    *
-   * @param message to be parsed
-   * @return returns the coresponding command
-   * @throws NoSuchCommand    exception if command isn't found or other exception
-   * @throws RuntimeException if something else goes wrong during parsing of the message
+   * @param logic   The control panel logic.
+   * @param handler The communication handler.
    */
-  public Command parse(String message) throws IllegalArgumentException {
+  public ControlPanelCommandParser(ControlPanelLogic logic, CommunicationHandler handler) {
+    super(handler);
+    this.logic = logic;
+  }
+
+  @Override
+  public Command parseSpecificCommand(String commandWord, ArrayDeque<String> args)
+      throws IllegalArgumentException {
     Command command = null;
-
-    List<String> strings = List.of(message.split(" "));
-    ArrayDeque<String> args = new ArrayDeque<>(strings);
-
-    String commandword = args.poll();
-
-    if (commandword.equals("Encrypt")) {
+    if (commandWord.equals("Encrypt")) {
       String keyEncoded = String.valueOf(args.poll());
       command = new EnableEncryption(handler, keyEncoded);
     } else {
       int nodeId = Integer.parseInt(args.poll());
 
-      switch (commandword) {
+      switch (commandWord) {
         case "add" -> {
           SensorActuatorNodeInfo sensorActuatorNodeInfo = parseSensorActuatorNodeInfo(nodeId, args);
           command = new AddNode(logic, sensorActuatorNodeInfo);
@@ -72,7 +66,7 @@ public class CommandParser {
   }
 
   /**
-   * Takes in a node id and a list of arguments that represent the actuators in an actuator node
+   * Takes in a node id and a list of arguments that represent the actuators in an actuator node.
    *
    * @param nodeId the id of the node to make SensorActuatorNodeInfo for
    * @param args   a queue of information for the actuators in the node
@@ -96,10 +90,10 @@ public class CommandParser {
   }
 
   /**
-   * Takes in a queue of arguments that will be parsed in to a list of sensor readings
+   * Takes in a queue of arguments that will be parsed in to a list of sensor readings.
    *
    * @param args queue
-   * @return ArrayList<SensorReading> list of parsed sensor readings
+   * @return a list of parsed sensor readings
    */
   private ArrayList<SensorReading> parseReadings(ArrayDeque<String> args) {
     ArrayList<SensorReading> readings = new ArrayList<>();

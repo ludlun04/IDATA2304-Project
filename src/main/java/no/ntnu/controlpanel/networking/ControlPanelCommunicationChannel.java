@@ -2,7 +2,6 @@ package no.ntnu.controlpanel.networking;
 
 import java.io.IOException;
 import java.net.Socket;
-
 import no.ntnu.controlpanel.CommunicationChannel;
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.tools.Logger;
@@ -19,7 +18,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
   private boolean handShakeCompleted;
   private boolean stayConnected;
   private ControlPanelCommunicationHandler handler;
-  private ControlPanelLogic logic;
+  private final ControlPanelLogic logic;
 
   public ControlPanelCommunicationChannel(ControlPanelLogic logic) throws IOException {
     if (logic == null) {
@@ -27,6 +26,15 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     }
     this.logic = logic;
     this.handShakeCompleted = false;
+  }
+
+  private static void wait(int delayMillis) {
+
+    try {
+      Thread.sleep(delayMillis);
+    } catch (InterruptedException e) {
+      Logger.error("Could not sleep");
+    }
   }
 
   public void performHandshake() {
@@ -69,7 +77,8 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
    * @param unit       unit the sensor reads in
    * @param amount     amount of sensors to add
    */
-  public void addSensor(int nodeId, String sensorType, int min, int max, int current, String unit, int amount) {
+  public void addSensor(int nodeId, String sensorType, int min, int max, int current, String unit,
+                        int amount) {
     this.handler.sendEncryptedMessage(String.format("add sensor %d %s %d %d %d %s %d",
         nodeId, sensorType, min, max, current, unit, amount));
   }
@@ -90,17 +99,17 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     Logger.info("Connecting to socket");
 
     attemptConnect();
-      new Thread(() -> {
-          while (this.stayConnected) {
-          try {
-            this.handler.handleEncryptedMessage();
-          } catch (IOException | NullPointerException exception ) {
-            Logger.error("Lost connection. " + exception.getMessage());
-            handleAttemptedReconnection();
-          }
-
+    new Thread(() -> {
+      while (this.stayConnected) {
+        try {
+          this.handler.handleEncryptedMessage();
+        } catch (IOException | NullPointerException exception) {
+          Logger.error("Lost connection. " + exception.getMessage());
+          handleAttemptedReconnection();
         }
-      }).start();
+
+      }
+    }).start();
 
     return stayConnected;
   }
@@ -116,9 +125,10 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
   }
 
   private void createHandler() throws IOException {
-    CommunicationHandler communicationHandler = new CommunicationHandler(new Socket("127.0.0.1", 8765));
+    CommunicationHandler communicationHandler =
+        new CommunicationHandler(new Socket("127.0.0.1", 8765));
     this.handler = new ControlPanelCommunicationHandler(communicationHandler,
-            new CommandParser(logic, communicationHandler));
+        new ControlPanelCommandParser(logic, communicationHandler));
 
     performHandshake();
     this.handler.handleMessage(); // needed to establish encryption
@@ -144,23 +154,13 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
         wait(RECONNECT_ATTEMPT_WAIT_MILLIS);
 
         if (tries > 0) {
-            tries--;
+          tries--;
         }
       }
 
     }
     return result;
   }
-
-  private static void wait(int delayMillis) {
-
-    try {
-      Thread.sleep(delayMillis);
-    } catch (InterruptedException e) {
-      Logger.error("Could not sleep");
-    }
-  }
-
 
   @Override
   public void close() {

@@ -18,6 +18,22 @@ public class GreenhouseApplication extends Application implements NodeStateListe
   private final Map<SensorActuatorNode, NodeGuiWindow> nodeWindows = new HashMap<>();
   private Stage mainStage;
 
+  /**
+   * Launch the GUI Application.
+   *
+   * @param fake When true, emulate fake events instead of opening real sockets
+   */
+  public static void startApp(boolean fake) {
+    Logger.info("Running greenhouse simulator with JavaFX GUI...");
+    simulator = new GreenhouseSimulator(fake);
+    launch();
+  }
+
+  /**
+   * Start the GUI application.
+   *
+   * @param mainStage The main stage of the application
+   */
   @Override
   public void start(Stage mainStage) {
     this.mainStage = mainStage;
@@ -33,6 +49,9 @@ public class GreenhouseApplication extends Application implements NodeStateListe
     simulator.start();
   }
 
+  /**
+   * Close the application.
+   */
   private void closeApplication() {
     Logger.info("Closing Greenhouse application...");
     simulator.stop();
@@ -44,16 +63,10 @@ public class GreenhouseApplication extends Application implements NodeStateListe
   }
 
   /**
-   * Start the GUI Application.
+   * Handle the event when a node is ready. Creates a new window for the node.
    *
-   * @param fake When true, emulate fake events instead of opening real sockets
+   * @param node the node which is ready now
    */
-  public static void startApp(boolean fake) {
-    Logger.info("Running greenhouse simulator with JavaFX GUI...");
-    simulator = new GreenhouseSimulator(fake);
-    launch();
-  }
-
   @Override
   public void onNodeReady(SensorActuatorNode node) {
     Logger.info("Starting window for node " + node.getId());
@@ -62,6 +75,11 @@ public class GreenhouseApplication extends Application implements NodeStateListe
     window.show();
   }
 
+  /**
+   * Handle the event when a node is stopped. Closes the window for the node.
+   *
+   * @param node The node which is stopped
+   */
   @Override
   public void onNodeStopped(SensorActuatorNode node) {
     NodeGuiWindow window = nodeWindows.remove(node);
