@@ -9,6 +9,7 @@ import no.ntnu.greenhouse.commands.GetNodeValues;
 import no.ntnu.greenhouse.commands.SetActuatorState;
 import no.ntnu.greenhouse.commands.SetupNodes;
 import no.ntnu.greenhouse.commands.StartDataTransfer;
+import no.ntnu.utils.CommandParser;
 import no.ntnu.utils.CommunicationHandler;
 import no.ntnu.utils.commands.Command;
 import no.ntnu.utils.commands.EnableEncryption;
@@ -16,40 +17,25 @@ import no.ntnu.utils.commands.EnableEncryption;
 /**
  * Class for parsing commands from messages
  */
-public class GreenhouseCommandParser {
+public class GreenhouseCommandParser extends CommandParser {
   private GreenhouseSimulator simulator;
   private CommunicationHandler handler;
 
   /**
    * Constructor for GreenhouseCommandParser
+   *
    * @param simulator the greenhouse simulator
    * @param handler the communication handler
    */
   public GreenhouseCommandParser(GreenhouseSimulator simulator, CommunicationHandler handler) {
+    super(handler);
     this.simulator = simulator;
-    this.handler = handler;
   }
 
-  /**
-   * Takes in a message and parses out a command based on the contents of the message
-   *
-   * @param message to be parsed
-   * @return returns the corresponding command
-   * @throws NoSuchCommand    exception if command isn't found or another exception
-   */
-  public Command parse(String message) throws IllegalArgumentException {
+  @Override
+  public Command parseSpecificCommand(String commandWord, ArrayDeque<String> args) throws IllegalArgumentException {
     Command command = null;
-
-    List<String> strings = List.of(message.split(" "));
-    ArrayDeque<String> args = new ArrayDeque<>(strings);
-
-    String commandWord = args.poll();
-
       switch (commandWord) {
-        case "Encrypt" -> {
-          String keyEncoded = String.valueOf(args.poll());
-          command = new EnableEncryption(handler, keyEncoded);
-        }
         case "setupNodes" -> {
           command = new SetupNodes(simulator);
         }

@@ -11,6 +11,7 @@ import no.ntnu.controlpanel.networking.commands.UpdateActuator;
 import no.ntnu.controlpanel.networking.commands.UpdateSensors;
 import no.ntnu.greenhouse.Actuator;
 import no.ntnu.greenhouse.SensorReading;
+import no.ntnu.utils.CommandParser;
 import no.ntnu.utils.CommunicationHandler;
 import no.ntnu.utils.commands.Command;
 import no.ntnu.utils.commands.EnableEncryption;
@@ -18,9 +19,8 @@ import no.ntnu.utils.commands.EnableEncryption;
 /**
  * Class for parsing commands from messages.
  */
-public class ControlPanelCommandParser {
+public class ControlPanelCommandParser extends CommandParser {
   private ControlPanelLogic logic;
-  private CommunicationHandler handler;
 
   /**
    * Create a new control panel command parser.
@@ -29,33 +29,20 @@ public class ControlPanelCommandParser {
    * @param handler The communication handler.
    */
   public ControlPanelCommandParser(ControlPanelLogic logic, CommunicationHandler handler) {
+    super(handler);
     this.logic = logic;
-    this.handler = handler;
   }
 
-  /**
-   * Takes in a message and returns a command based on the parsed contents of the message.
-   *
-   * @param message to be parsed
-   * @return returns the corresponding command
-   * @throws NoSuchCommand    exception if command isn't found or other exception
-   * @throws RuntimeException if something else goes wrong during parsing of the message
-   */
-  public Command parse(String message) throws IllegalArgumentException {
+    @Override
+  public Command parseSpecificCommand(String commandWord, ArrayDeque<String> args) throws IllegalArgumentException {
     Command command = null;
-
-    List<String> strings = List.of(message.split(" "));
-    ArrayDeque<String> args = new ArrayDeque<>(strings);
-
-    String commandword = args.poll();
-
-    if (commandword.equals("Encrypt")) {
+    if (commandWord.equals("Encrypt")) {
       String keyEncoded = String.valueOf(args.poll());
       command = new EnableEncryption(handler, keyEncoded);
     } else {
       int nodeId = Integer.parseInt(args.poll());
 
-      switch (commandword) {
+      switch (commandWord) {
         case "add" -> {
           SensorActuatorNodeInfo sensorActuatorNodeInfo = parseSensorActuatorNodeInfo(nodeId, args);
           command = new AddNode(logic, sensorActuatorNodeInfo);
