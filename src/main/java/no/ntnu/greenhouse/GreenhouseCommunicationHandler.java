@@ -9,12 +9,12 @@ import no.ntnu.utils.CommunicationHandler;
 import java.io.IOException;
 
 public class GreenhouseCommunicationHandler {
-  private CommandParser commandParser;
+  private GreenhouseCommandParser greenhouseCommandParser;
   private CommunicationHandler handler;
 
-  public GreenhouseCommunicationHandler(CommunicationHandler handler, CommandParser commandParser) {
+  public GreenhouseCommunicationHandler(CommunicationHandler handler, GreenhouseCommandParser greenhouseCommandParser) {
     this.handler = handler;
-    this.commandParser = commandParser;
+    this.greenhouseCommandParser = greenhouseCommandParser;
   }
 
   public void enableEncryptionwithKey(SecretKey key) {
@@ -59,7 +59,7 @@ public class GreenhouseCommunicationHandler {
     if (message != null) {
       Command command = null;
       try {
-        command = this.commandParser.parse(message);
+        command = this.greenhouseCommandParser.parse(message);
       } catch (IllegalArgumentException | NoSuchCommand e) {
         Logger.error("Failed to parse command. " + e.getMessage());
       }

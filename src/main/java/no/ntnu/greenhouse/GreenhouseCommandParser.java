@@ -16,16 +16,16 @@ import no.ntnu.utils.commands.EnableEncryption;
 /**
  * Class for parsing commands from messages
  */
-public class CommandParser {
+public class GreenhouseCommandParser {
   private GreenhouseSimulator simulator;
   private CommunicationHandler handler;
 
   /**
-   * Constructor for CommandParser
+   * Constructor for GreenhouseCommandParser
    * @param simulator the greenhouse simulator
    * @param handler the communication handler
    */
-  public CommandParser(GreenhouseSimulator simulator, CommunicationHandler handler) {
+  public GreenhouseCommandParser(GreenhouseSimulator simulator, CommunicationHandler handler) {
     this.simulator = simulator;
     this.handler = handler;
   }

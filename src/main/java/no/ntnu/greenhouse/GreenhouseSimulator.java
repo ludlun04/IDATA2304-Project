@@ -9,7 +9,6 @@ import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Application entrypoint - a simulator for a greenhouse.
@@ -79,7 +78,7 @@ public class GreenhouseSimulator {
         Logger.info("Attempting to connect...");
         try (Socket socket = new Socket("127.0.0.1", 8765)) {
           CommunicationHandler handler = new CommunicationHandler(socket);
-          this.handler = new GreenhouseCommunicationHandler(handler, new CommandParser(this, handler));
+          this.handler = new GreenhouseCommunicationHandler(handler, new GreenhouseCommandParser(this, handler));
           handler.sendMessage("I am greenhouse");
 
           this.handler.handleMessage(); //first message not encrypted
