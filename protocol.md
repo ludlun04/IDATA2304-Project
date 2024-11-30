@@ -63,7 +63,7 @@ The greenhouseNodes holds multiple sensorActuatorNodes, so at the end of the day
 ### Server
 Once the server starts, it will open a TCP socket on the decided port and wait for clients to
 connect.
-When a client connects, the server will see what type of client it is (Greenhouse or Control Panel).
+When a client connects, the server will see what type of client it is (a Greenhouse or Control Panel).
 The server stores one instance of the greenhouse and a list of all connected control panels. These
 are updated as clients connect and disconnect. A new thread is also created to manage each active
 client.
