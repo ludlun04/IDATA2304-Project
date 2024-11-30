@@ -109,7 +109,7 @@ public class SensorPane extends TitledPane {
    * Update the label for a sensor.
    *
    * @param sensor The sensor to update the label for
-   * @param index The index of the sensor in the list
+   * @param index  The index of the sensor in the list
    */
   private void updateSensorLabel(SensorReading sensor, int index) {
     if (sensorProps.size() > index) {

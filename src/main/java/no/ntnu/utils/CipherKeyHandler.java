@@ -13,7 +13,7 @@ import no.ntnu.tools.Logger;
  * <p>Uses an AES key for encryption and decryption.
  */
 public class CipherKeyHandler {
-  private SecretKey aesKey;
+  private final SecretKey aesKey;
 
   /**
    * Creates a new CipherKeyHandler with the given AES key.

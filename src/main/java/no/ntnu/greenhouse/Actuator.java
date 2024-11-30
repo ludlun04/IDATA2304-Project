@@ -166,7 +166,7 @@ public class Actuator {
    * Get the ID of the actuator.
    *
    * @return An ID which is guaranteed to be unique at a node level, not necessarily unique at
-   *     the whole greenhouse-network level.
+   * the whole greenhouse-network level.
    */
   public int getId() {
     return id;

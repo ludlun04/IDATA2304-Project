@@ -11,6 +11,7 @@ public abstract class SimulatorCommand extends Command {
 
   /**
    * Constructor for SimulatorCommand
+   *
    * @param simulator the greenhouse simulator
    */
   protected SimulatorCommand(GreenhouseSimulator simulator) {

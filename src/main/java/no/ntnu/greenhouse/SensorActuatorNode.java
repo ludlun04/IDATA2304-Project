@@ -25,11 +25,9 @@ public class SensorActuatorNode implements ActuatorListener, CommunicationChanne
   private final List<SensorListener> sensorListeners = new LinkedList<>();
   private final List<ActuatorListener> actuatorListeners = new LinkedList<>();
   private final List<NodeStateListener> stateListeners = new LinkedList<>();
-
-  Timer sensorReadingTimer;
-
-  private boolean running;
   private final Random random = new Random();
+  Timer sensorReadingTimer;
+  private boolean running;
 
   /**
    * Create a sensor/actuator node. Note: the node itself does not check whether the ID is unique.

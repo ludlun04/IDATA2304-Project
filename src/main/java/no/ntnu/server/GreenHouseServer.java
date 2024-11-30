@@ -15,7 +15,7 @@ import no.ntnu.utils.CommunicationHandler;
  * Server for the greenhouse system.
  */
 public class GreenHouseServer extends Server {
-  private ArrayList<ControlPanelHandler> controlPanels;
+  private final ArrayList<ControlPanelHandler> controlPanels;
   private GreenHouseHandler greenhouse;
 
   /**

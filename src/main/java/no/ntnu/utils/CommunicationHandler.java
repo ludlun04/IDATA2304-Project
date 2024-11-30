@@ -16,9 +16,9 @@ import no.ntnu.tools.Logger;
  * <p>Handles optional enabling of encryption of the communication using a given key
  */
 public class CommunicationHandler {
-  protected BufferedReader inputReader;
   private final PrintWriter outputWriter;
   private final Socket socket;
+  protected BufferedReader inputReader;
   private CipherKeyHandler cipherKeyHandler;
 
   /**
@@ -65,7 +65,7 @@ public class CommunicationHandler {
    * Waits for a message from the socket. Returns a message if there is one, and null otherwise.
    *
    * @return message that has been sent from the socket or null if the was no
-   *     message to get
+   * message to get
    */
   public String getMessage() {
     String result = null;
@@ -81,7 +81,7 @@ public class CommunicationHandler {
    * Waits for a message from the socket and decrypts it.
    *
    * @return decrypted message that has been sent from the client or null if there
-   *     was no message to get
+   * was no message to get
    */
   public String getDecryptedMessage() {
     String encryptedMessage = getMessage();

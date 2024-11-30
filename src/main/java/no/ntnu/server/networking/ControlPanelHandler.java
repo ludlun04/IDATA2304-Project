@@ -12,7 +12,7 @@ public class ControlPanelHandler extends ServerSideHandler {
    * Creates a new instance of the ControlPanelHandler.
    *
    * @param handler The communication handler to use.
-   * @param server The server to use.
+   * @param server  The server to use.
    */
   public ControlPanelHandler(CommunicationHandler handler, GreenHouseServer server) {
     super(handler, server);

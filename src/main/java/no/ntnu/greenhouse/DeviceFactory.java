@@ -56,9 +56,9 @@ public class DeviceFactory {
   /**
    * Add a number of actuators to a sensor/actuator node.
    *
-   * @param node The node to add actuators to
+   * @param node     The node to add actuators to
    * @param template The template actuator to clone
-   * @param n The number of actuators to add
+   * @param n        The number of actuators to add
    */
   static void addActuators(SensorActuatorNode node, Actuator template, int n) {
     if (template == null) {

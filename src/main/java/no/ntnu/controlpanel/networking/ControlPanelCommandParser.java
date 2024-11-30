@@ -2,7 +2,6 @@ package no.ntnu.controlpanel.networking;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.List;
 import no.ntnu.controlpanel.ControlPanelLogic;
 import no.ntnu.controlpanel.SensorActuatorNodeInfo;
 import no.ntnu.controlpanel.networking.commands.AddNode;
@@ -20,7 +19,7 @@ import no.ntnu.utils.commands.EnableEncryption;
  * Class for parsing commands from messages.
  */
 public class ControlPanelCommandParser extends CommandParser {
-  private ControlPanelLogic logic;
+  private final ControlPanelLogic logic;
 
   /**
    * Create a new control panel command parser.
@@ -33,8 +32,9 @@ public class ControlPanelCommandParser extends CommandParser {
     this.logic = logic;
   }
 
-    @Override
-  public Command parseSpecificCommand(String commandWord, ArrayDeque<String> args) throws IllegalArgumentException {
+  @Override
+  public Command parseSpecificCommand(String commandWord, ArrayDeque<String> args)
+      throws IllegalArgumentException {
     Command command = null;
     if (commandWord.equals("Encrypt")) {
       String keyEncoded = String.valueOf(args.poll());

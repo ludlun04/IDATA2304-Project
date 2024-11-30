@@ -10,9 +10,9 @@ import no.ntnu.utils.CommunicationHandler;
  */
 public abstract class ServerSideHandler {
 
-  private CommunicationHandler communicationHandler;
+  private final CommunicationHandler communicationHandler;
   private boolean isConnected;
-  private GreenHouseServer server;
+  private final GreenHouseServer server;
 
   /**
    * Creates a new instance of the ServerSideHandler.

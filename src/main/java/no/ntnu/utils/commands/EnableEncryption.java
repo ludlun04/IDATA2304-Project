@@ -11,13 +11,13 @@ import no.ntnu.utils.CommunicationHandler;
  */
 public class EnableEncryption extends Command {
 
-  private CommunicationHandler handler;
-  private String keyEncoded;
+  private final CommunicationHandler handler;
+  private final String keyEncoded;
 
   /**
    * Creates a new instance of the EnableEncryption command.
    *
-   * @param handler The communication handler to use.
+   * @param handler    The communication handler to use.
    * @param keyEncoded The key to use for encryption.
    */
   public EnableEncryption(CommunicationHandler handler, String keyEncoded) {

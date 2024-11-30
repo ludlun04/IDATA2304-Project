@@ -1,17 +1,17 @@
 package no.ntnu.controlpanel.networking;
 
-import no.ntnu.utils.commands.Command;
+import java.io.IOException;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
-
-import java.io.IOException;
+import no.ntnu.utils.commands.Command;
 
 public class ControlPanelCommunicationHandler {
 
-  private ControlPanelCommandParser commandParser;
-  private CommunicationHandler handler;
+  private final ControlPanelCommandParser commandParser;
+  private final CommunicationHandler handler;
 
-  public ControlPanelCommunicationHandler(CommunicationHandler handler, ControlPanelCommandParser commandParser) {
+  public ControlPanelCommunicationHandler(CommunicationHandler handler,
+                                          ControlPanelCommandParser commandParser) {
     this.handler = handler;
     this.commandParser = commandParser;
   }

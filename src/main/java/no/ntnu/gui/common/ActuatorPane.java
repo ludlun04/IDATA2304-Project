@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-// import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.HBox;
@@ -44,7 +43,7 @@ public class ActuatorPane extends TitledPane {
    * Add actuator controls to the parent pane.
    *
    * @param actuators The actuators to add
-   * @param parent The parent pane to add the controls to
+   * @param parent    The parent pane to add the controls to
    */
   private void addActuatorControls(ActuatorCollection actuators, Pane parent) {
     actuators.forEach(actuator ->

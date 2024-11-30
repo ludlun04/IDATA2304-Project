@@ -10,7 +10,7 @@ import no.ntnu.tools.Logger;
  * must be extended to implement the logic for handling incoming connections.
  */
 public abstract class Server {
-  private ServerSocket serverSocket;
+  private final ServerSocket serverSocket;
 
   /**
    * Creates a new server using the specified port.

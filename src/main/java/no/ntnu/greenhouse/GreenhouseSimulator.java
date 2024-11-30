@@ -1,14 +1,15 @@
 package no.ntnu.greenhouse;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.Socket;
-import java.util.*;
-
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import javax.crypto.SecretKey;
 import no.ntnu.listeners.greenhouse.NodeStateListener;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
-
-import javax.crypto.SecretKey;
 
 /**
  * Application entrypoint - a simulator for a greenhouse.
@@ -78,7 +79,8 @@ public class GreenhouseSimulator {
         Logger.info("Attempting to connect...");
         try (Socket socket = new Socket("127.0.0.1", 8765)) {
           CommunicationHandler handler = new CommunicationHandler(socket);
-          this.handler = new GreenhouseCommunicationHandler(handler, new GreenhouseCommandParser(this, handler));
+          this.handler = new GreenhouseCommunicationHandler(handler,
+              new GreenhouseCommandParser(this, handler));
           handler.sendMessage("I am greenhouse");
 
           this.handler.handleMessage(); //first message not encrypted
@@ -89,11 +91,11 @@ public class GreenhouseSimulator {
           }
 
         } catch (IOException e) {
-            try {
-                Thread.sleep(sleepTime);
-            } catch (InterruptedException interruptedException) {
-                Logger.error("Failed to sleep: " + interruptedException.getMessage());
-            }
+          try {
+            Thread.sleep(sleepTime);
+          } catch (InterruptedException interruptedException) {
+            Logger.error("Failed to sleep: " + interruptedException.getMessage());
+          }
         }
       }
     }).start();

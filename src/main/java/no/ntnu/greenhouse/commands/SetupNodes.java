@@ -9,6 +9,7 @@ public class SetupNodes extends SimulatorCommand {
 
   /**
    * Constructor for SetupNodes
+   *
    * @param simulator the greenhouse simulator
    */
   public SetupNodes(GreenhouseSimulator simulator) {

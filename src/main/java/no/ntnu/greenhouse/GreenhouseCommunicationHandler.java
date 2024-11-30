@@ -1,18 +1,18 @@
 package no.ntnu.greenhouse;
 
+import java.io.IOException;
 import javax.crypto.SecretKey;
 import no.ntnu.controlpanel.networking.NoSuchCommand;
-import no.ntnu.utils.commands.Command;
 import no.ntnu.tools.Logger;
 import no.ntnu.utils.CommunicationHandler;
-
-import java.io.IOException;
+import no.ntnu.utils.commands.Command;
 
 public class GreenhouseCommunicationHandler {
-  private GreenhouseCommandParser greenhouseCommandParser;
-  private CommunicationHandler handler;
+  private final GreenhouseCommandParser greenhouseCommandParser;
+  private final CommunicationHandler handler;
 
-  public GreenhouseCommunicationHandler(CommunicationHandler handler, GreenhouseCommandParser greenhouseCommandParser) {
+  public GreenhouseCommunicationHandler(CommunicationHandler handler,
+                                        GreenhouseCommandParser greenhouseCommandParser) {
     this.handler = handler;
     this.greenhouseCommandParser = greenhouseCommandParser;
   }

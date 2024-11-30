@@ -28,17 +28,16 @@ import no.ntnu.tools.Logger;
  */
 public class ControlPanelApplication extends Application implements GreenhouseEventListener,
     CommunicationChannelListener {
-  private static ControlPanelLogic logic;
   private static final int WIDTH = 500;
   private static final int HEIGHT = 400;
+  private static ControlPanelLogic logic;
   private static CommunicationChannel channel;
-
-  private TabPane nodeTabPane;
-  private Scene mainScene;
   private final Map<Integer, SensorPane> sensorPanes = new HashMap<>();
   private final Map<Integer, ActuatorPane> actuatorPanes = new HashMap<>();
   private final Map<Integer, SensorActuatorNodeInfo> nodeInfos = new HashMap<>();
   private final Map<Integer, Tab> nodeTabs = new HashMap<>();
+  private TabPane nodeTabPane;
+  private Scene mainScene;
 
   /**
    * Application entrypoint for the GUI of a control panel.
@@ -56,6 +55,26 @@ public class ControlPanelApplication extends Application implements GreenhouseEv
     ControlPanelApplication.channel = channel;
     Logger.info("Running control panel GUI...");
     launch();
+  }
+
+  /**
+   * Create a label with a message. Used when there is no data to show.
+   *
+   * @return A label with a message for when there is no data to show
+   */
+  private static Label createEmptyContent() {
+    Label l = new Label("Waiting for node data...");
+    l.setAlignment(Pos.CENTER);
+    return l;
+  }
+
+  /**
+   * Create an empty sensor pane.
+   *
+   * @return An empty sensor pane
+   */
+  private static SensorPane createEmptySensorPane() {
+    return new SensorPane();
   }
 
   /**
@@ -81,17 +100,6 @@ public class ControlPanelApplication extends Application implements GreenhouseEv
     if (!channel.open()) {
       logic.onCommunicationChannelClosed();
     }
-  }
-
-  /**
-   * Create a label with a message. Used when there is no data to show.
-   *
-   * @return A label with a message for when there is no data to show
-   */
-  private static Label createEmptyContent() {
-    Label l = new Label("Waiting for node data...");
-    l.setAlignment(Pos.CENTER);
-    return l;
   }
 
   /**
@@ -154,9 +162,9 @@ public class ControlPanelApplication extends Application implements GreenhouseEv
   /**
    * Handle the event of an actuator state change. Updates the GUI with the new actuator state.
    *
-   * @param nodeId ID of the node to which the actuator is attached
+   * @param nodeId     ID of the node to which the actuator is attached
    * @param actuatorId ID of the actuator
-   * @param isOn  When true, actuator is on; off when false.
+   * @param isOn       When true, actuator is on; off when false.
    */
   @Override
   public void onActuatorStateChanged(int nodeId, int actuatorId, boolean isOn) {
@@ -183,7 +191,7 @@ public class ControlPanelApplication extends Application implements GreenhouseEv
   /**
    * Get the stored actuator from the node info.
    *
-   * @param nodeId ID of the node
+   * @param nodeId     ID of the node
    * @param actuatorId ID of the actuator
    * @return The actuator, or null if not found
    */
@@ -210,7 +218,7 @@ public class ControlPanelApplication extends Application implements GreenhouseEv
   /**
    * Remove a node tab from the GUI.
    *
-   * @param nodeId ID of the node
+   * @param nodeId  ID of the node
    * @param nodeTab The tab to remove
    */
   private void removeNodeTab(int nodeId, Tab nodeTab) {
@@ -252,15 +260,6 @@ public class ControlPanelApplication extends Application implements GreenhouseEv
     tab.setContent(new VBox(sensorPane, actuatorPane));
     nodeTabs.put(nodeInfo.getId(), tab);
     return tab;
-  }
-
-  /**
-   * Create an empty sensor pane.
-   *
-   * @return An empty sensor pane
-   */
-  private static SensorPane createEmptySensorPane() {
-    return new SensorPane();
   }
 
   /**

@@ -19,6 +19,17 @@ public class GreenhouseApplication extends Application implements NodeStateListe
   private Stage mainStage;
 
   /**
+   * Launch the GUI Application.
+   *
+   * @param fake When true, emulate fake events instead of opening real sockets
+   */
+  public static void startApp(boolean fake) {
+    Logger.info("Running greenhouse simulator with JavaFX GUI...");
+    simulator = new GreenhouseSimulator(fake);
+    launch();
+  }
+
+  /**
    * Start the GUI application.
    *
    * @param mainStage The main stage of the application
@@ -49,17 +60,6 @@ public class GreenhouseApplication extends Application implements NodeStateListe
     } catch (Exception e) {
       Logger.error("Could not stop the application: " + e.getMessage());
     }
-  }
-
-  /**
-   * Launch the GUI Application.
-   *
-   * @param fake When true, emulate fake events instead of opening real sockets
-   */
-  public static void startApp(boolean fake) {
-    Logger.info("Running greenhouse simulator with JavaFX GUI...");
-    simulator = new GreenhouseSimulator(fake);
-    launch();
   }
 
   /**

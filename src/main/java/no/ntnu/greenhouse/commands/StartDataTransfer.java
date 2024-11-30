@@ -9,6 +9,7 @@ public class StartDataTransfer extends SimulatorCommand {
 
   /**
    * Constructor for StartDataTransfer
+   *
    * @param simulator the greenhouse simulator
    */
   public StartDataTransfer(GreenhouseSimulator simulator) {

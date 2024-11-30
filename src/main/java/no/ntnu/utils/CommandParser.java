@@ -8,7 +8,7 @@ import no.ntnu.utils.commands.EnableEncryption;
 
 /**
  * Abstract class for parsing commands from messages.
- *
+ * <p>
  * Used by GreenhouseCommandParser.java and ControlPanelCommandParser.java
  */
 public abstract class CommandParser {
@@ -23,14 +23,14 @@ public abstract class CommandParser {
     this.handler = handler;
   }
 
-    /**
-     * Takes in a message and returns a command based on the parsed contents of the message.
-     *
-     * @param message the message to be parsed
-     * @return returns the corresponding command
-     * @throws IllegalArgumentException if the message is not a valid command
-     */
-  public  Command parse(String message) throws IllegalArgumentException {
+  /**
+   * Takes in a message and returns a command based on the parsed contents of the message.
+   *
+   * @param message the message to be parsed
+   * @return returns the corresponding command
+   * @throws IllegalArgumentException if the message is not a valid command
+   */
+  public Command parse(String message) throws IllegalArgumentException {
     Command command = null;
 
     List<String> strings = List.of(message.split(" "));
@@ -57,5 +57,5 @@ public abstract class CommandParser {
    * @throws NoSuchCommand    exception if command isn't found or other exception
    * @throws RuntimeException if something else goes wrong during parsing of the message
    */
-    protected abstract Command parseSpecificCommand(String commandWord, ArrayDeque<String> args);
+  protected abstract Command parseSpecificCommand(String commandWord, ArrayDeque<String> args);
 }

@@ -12,7 +12,7 @@ public class GreenHouseHandler extends ServerSideHandler {
    * Creates a new instance of the GreenHouseHandler.
    *
    * @param communicationHandler The communication handler to use.
-   * @param server The server to use.
+   * @param server               The server to use.
    */
   public GreenHouseHandler(CommunicationHandler communicationHandler, GreenHouseServer server) {
     super(communicationHandler, server);

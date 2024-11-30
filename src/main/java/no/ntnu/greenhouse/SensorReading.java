@@ -7,8 +7,8 @@ import java.util.Objects;
  */
 public class SensorReading {
   private final String type;
-  private double value;
   private final String unit;
+  private double value;
 
   /**
    * Create a new sensor reading.
@@ -42,21 +42,21 @@ public class SensorReading {
   }
 
   /**
-   * Get the unit of the sensor reading.
-   *
-   * @return The unit of the sensor reading
-   */
-  public String getUnit() {
-    return unit;
-  }
-
-  /**
    * Set the value of the sensor reading.
    *
    * @param newValue The new value of the sensor reading
    */
   public void setValue(double newValue) {
     this.value = newValue;
+  }
+
+  /**
+   * Get the unit of the sensor reading.
+   *
+   * @return The unit of the sensor reading
+   */
+  public String getUnit() {
+    return unit;
   }
 
   /**
