@@ -120,6 +120,12 @@ A common value type we use across many of our messages is the nodeId. This infor
 Every message contains a commandword at the start, this tells the receiver what it should do and if it should send data as a response. 
 If an action requires information in addition to the commandword, the commandword will be followed by the information.
 
+Space is used to seperate segements of a message like commandword and NodeId
+
+The end of a message gets denoted with a newline character
+
+All Information gets Serialized to strings before being sent over the network and then parsed back in to their origional formats at the recievers end
+
 ### Commands supported by control-panel
 - add NodeId ActuatorId ActuatorType ActuatorState ... (actuatorId, type and state is repeated as many times as there are actuators on the node)
 - remove NodeId
