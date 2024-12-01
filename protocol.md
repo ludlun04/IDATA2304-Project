@@ -12,7 +12,7 @@ distributed application.
 * Sensor and actuator node - a computer which has direct access to a set of sensors, a set of
   actuators. 
 * Greenhouse node - a device in the greenhouse that is connected to the sensor actuator nodes and the internet.
-* Greenhouse server - a main server that all client nodes connect to, bot control-panel nodes and the greenhouse node.
+* Greenhouse server - a main server that all client nodes connect to, both control-panel nodes and the greenhouse node.
 * Control-panel node - a device connected to the Internet which visualizes status of sensor and
   actuator nodes and sends control commands to them.
 * Graphical User Interface (GUI) - A graphical interface where users of the system can interact with
@@ -54,8 +54,6 @@ a combination of unicast and broadcast messages to allow for communication betwe
 These components are structured in such a way that connections can be established and terminated in
 any order any amount of times. This makes the application robust to network failures and
 all possible user actions.
-
-The greenhouseNodes holds multiple sensorActuatorNodes, so at the end of the day many control-panels can talk to many sensorActuatorNodes
 
 ![architecture](./images/GreenHouse-Server-ControlPanel.png)
 ## The flow of information and events
@@ -115,11 +113,22 @@ We use a stateless connection-oriented approach. This allows us to get two way c
 
 ## Types, constants
 
-A common value type we use across many of our messages is the nodeId. This informs the recieving party for which node to update the information display of or to change.
+A common value type we use across many of our messages is the nodeId. This informs the receiving party for which node to update the information display of or to change.
 
 ## Message format
 
 Every message contains a commandword at the start, this tells the receiver what it should do and if it should send data as a response. 
+If an action requires information in addition to the commandword, the commandword will be followed by the information.
+
+### Example 1
+`updateSensorsInformation 1 temperature 27.250000 °C humidity 78.290000 % humidity 77.980000 %`
+
+This will update the control panel with nodeId 1 with the new sensor information.
+
+### Example 2
+`set 2 7 true`
+
+This will set the actuator with actuatorId 7 on the node with nodeId 2 to true.
 
 ### Error messages
 
@@ -129,9 +138,7 @@ such as in parsing of a message, the error gets logged for debugging purposes.
 
 ## An example scenario
 
-TODO - describe a typical scenario. How would it look like from communication perspective? When 
-are connections established? Which packets are sent? How do nodes react on the packets? An 
-example scenario could be as follows:
+An example scenario could be as follows:
 1. A sensor node with ID=1 is started. It has a temperature sensor, two humidity sensors. It can also open a window.
 2. A sensor node with ID=2 is started. It has a single temperature sensor and can control two fans and a heater.
 3. A control panel node is started.
@@ -151,7 +158,7 @@ Connection of greenhouseNode
 3. Server then sets the connected socket as the greenhouse (All future control commands are sent through this socket)
 
 Connection of control panel
-1. control panel request to connecto to serverSocket greenhouseServer (Port 8765)
+1. control panel request to connect to serverSocket greenhouseServer (Port 8765)
 2. control panel sends a handshake request saying "I am controlPanel"
 3. Server sets connection as a controlpanel (All updates from the greenhouse will be sent through this socket)
 4. Server sends initial information about available nodes.
@@ -169,7 +176,16 @@ Actuator changes on a sensorActuatorNode
 ## Reliability and security
 
 ### Reliablitiy
-Package reliability comes from TCP reliability, we also have functionality to reconnect the sockets if they at any point loose connection.
+Package reliability comes from TCP reliability, 
+which ensures that all messages are received in the correct order, and that no messages are lost.
+
+There has also been implemented functionality for reconnecting, if any of the nodes lose connection
+to the server, they will keep trying to reconnect until they succeed. The server, control panel
+and greenhouse do not rely on starting in any particular order. 
 
 ### Security
-Packages are encrypted with symmetric keys so that they cannot be read by a unwanted third party (Man in the middle attack).
+Packages are encrypted with symmetric keys unique for each connection so that they are more
+resilient to being read by an unwanted third party (Man in the middle attack). The drawback of using
+symmetric keys is that the initial symmetric key is sent in plaintext. If a determined attacker 
+can intercept this message, they can decrypt future messages for that connection. Thus, a possible
+future improvement could be to use asymmetric encryption for the initial key exchange.

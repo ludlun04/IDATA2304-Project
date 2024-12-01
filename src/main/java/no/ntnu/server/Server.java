@@ -21,7 +21,7 @@ public abstract class Server {
     try {
       this.serverSocket = new ServerSocket(port);
     } catch (IOException e) {
-      System.out.println("Could not establish server socket");
+      Logger.error("Could not establish server socket");
       throw new RuntimeException(e);
     }
   }

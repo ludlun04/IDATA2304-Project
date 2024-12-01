@@ -218,7 +218,7 @@ public class GreenhouseSimulator {
         periodicSwitch.stop();
       }
     } else {
-      // TODO - here you stop the TCP/UDP communication
+      this.handler.close();
     }
   }
 
