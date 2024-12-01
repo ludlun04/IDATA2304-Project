@@ -37,8 +37,7 @@ public class ControlPanelCommunicationChannel implements CommunicationChannel {
     }
   }
 
-  public void performHandshake() {
-
+  private void performHandshake() {
     this.handShakeCompleted = false;
     new Thread(() -> {
       while (!handShakeCompleted) {
