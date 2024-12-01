@@ -121,6 +121,25 @@ A common value type we use across many of our messages is the nodeId. This infor
 
 Every message contains a commandword at the start, this tells the receiver what it should do and if it should send data as a response. 
 
+Commands supported by control-panel
+add NodeId ActuatorId ActuatorType ActuatorState ... (ActuatorInformation is repeated as many times as there are actuators on the node)
+remove NodeId
+updateSensorsInformation NodeId <reading...>
+updateActuatorInformation NodeId ActuatorId ActuatorState
+
+Commands supported by greenhouse node
+setupNodes
+startDataTransfer
+get NodeId
+set NodeId ActuatorId ActuatorState
+add sensor NodeId SensorType Sensor MinValue MaxValue IntitialValue Unit
+add actuator NodeId ActuatorId ActuatorType
+
+Commands supported by Server
+I am Controlpanel -> Special command used in handshake
+I am Greenhouse -> Special command used in handshake
+
+
 ### Error messages
 
 In our system nodes do not send error messages over the network. If a node encounters an error, 
