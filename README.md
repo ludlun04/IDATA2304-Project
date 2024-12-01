@@ -28,3 +28,18 @@ To run the control panel (only GUI-version is available): run the `main` method 
 If you want to simulate fake communication (just some periodic events happening), you can run
 both the greenhouse and control panel parts with a command line parameter `fake`. Check out
 classes in the [`no.ntnu.run` package](src/main/java/no/ntnu/run) for more details. 
+
+
+## How to run the application
+Main methods for running the application can be found inside the run package of the application
+
+### How to start the control-panel
+Note: To run multiple control-panels in intelij, you have to enable the "Allow multiple instances" setting on ControlPanelStarter.
+
+Navigate to the ControlPanelStarter class inside of the run package, from there run the main method.
+
+### How to start the greenhouse
+Navigate to the GreenhouseGuiStarter class inside of the run package, from there run the main method.
+
+### How to start the greenhouse server
+Navigate to the GreenhouseServerStarter class inside of the run package, from there run the main method.

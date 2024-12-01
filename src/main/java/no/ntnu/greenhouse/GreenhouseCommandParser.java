@@ -17,7 +17,6 @@ import no.ntnu.utils.commands.Command;
  */
 public class GreenhouseCommandParser extends CommandParser {
   private final GreenhouseSimulator simulator;
-  private CommunicationHandler handler;
 
   /**
    * Constructor for GreenhouseCommandParser

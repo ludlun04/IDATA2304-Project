@@ -81,7 +81,6 @@ public class GreenHouseServer extends Server {
         String initialMessage = newHandler.getMessage();
 
         String keyEncoded = Base64.getEncoder().encodeToString(uniqueHandlerKey.getEncoded());
-        String encryptionResponse = null;
 
         executeHandlerLogic(initialMessage, newHandler, keyEncoded);
 
