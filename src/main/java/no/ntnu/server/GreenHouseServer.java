@@ -141,6 +141,7 @@ public class GreenHouseServer extends Server {
 
         // attempt to get encrypted message, if 'OK' we know encryption is working
         if ("OK".equals(encryptionResponse)) {
+          Logger.info("Encryption successfully established");
           this.greenhouse.sendEncryptedMessage("setupNodes");
           this.greenhouse.sendEncryptedMessage("startDataTransfer");
           this.greenhouse.start();
