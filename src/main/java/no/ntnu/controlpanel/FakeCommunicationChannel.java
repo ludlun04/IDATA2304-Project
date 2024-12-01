@@ -83,7 +83,7 @@ public class FakeCommunicationChannel implements CommunicationChannel {
     timer.schedule(new TimerTask() {
       @Override
       public void run() {
-        System.out.println("Spawning node " + specification);
+        Logger.info("Spawning node " + specification);
         logic.onNodeAdded(nodeInfo);
       }
     }, delay * 1000L);
