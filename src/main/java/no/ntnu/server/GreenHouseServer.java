@@ -128,6 +128,10 @@ public class GreenHouseServer extends Server {
         break;
 
       case "I am greenhouse":
+        if (this.greenhouse != null) {
+          return;
+        }
+
         GreenHouseHandler greenHouseHandler = new GreenHouseHandler(newHandler, this);
         this.greenhouse = greenHouseHandler;
         Logger.info("Greenhouse connected");
