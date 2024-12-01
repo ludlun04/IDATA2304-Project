@@ -21,6 +21,8 @@ public class GreenhouseSimulator {
   private final boolean fake;
   private GreenhouseCommunicationHandler handler;
 
+  private boolean transferStarted;
+
   /**
    * Create a greenhouse simulator.
    *
@@ -29,6 +31,7 @@ public class GreenhouseSimulator {
    */
   public GreenhouseSimulator(boolean fake) {
     this.fake = fake;
+    this.transferStarted = false;
   }
 
   /**
@@ -101,11 +104,6 @@ public class GreenhouseSimulator {
     }).start();
   }
 
-  public void setupEncryption(SecretKey key) {
-    this.handler.enableEncryptionwithKey(key);
-    this.handler.sendEncryptedMessage("OK");
-  }
-
   /**
    * Add an actuator to a node.
    */
@@ -136,21 +134,30 @@ public class GreenhouseSimulator {
     }
   }
 
+  /**
+   * Setup the nodes.
+   */
   public void setupNodes() {
     for (SensorActuatorNode node : this.getNodes()) {
       sendNodeInformation(node);
     }
   }
 
+  /**
+   * Start the data transfer if it has not already started.
+   */
   public void startDataTransfer() {
-    for (SensorActuatorNode node : this.getNodes()) {
-      initializeActuatorListeners(node);
-      initializeSensorListeners(node);
+    if (!transferStarted) {
+      transferStarted = true;
+      for (SensorActuatorNode node : this.getNodes()) {
+        initializeActuatorListeners(node);
+        initializeSensorListeners(node);
+      }
     }
   }
 
   /**
-   * Send node information to client
+   * Send node information to client.
    *
    * @param node The node to send information about
    */
@@ -167,14 +174,14 @@ public class GreenhouseSimulator {
 
 
   /**
-   * Initialize actuator listeners
+   * Initialize actuator listeners.
    *
    * @param node The node to initialize listeners for
    */
   private void initializeActuatorListeners(SensorActuatorNode node) {
-    node.addActuatorListener((int nodeID, Actuator actuator) -> {
+    node.addActuatorListener((int nodeId, Actuator actuator) -> {
       String response = String.format(
-          "updateActuatorInformation %d %d %b", nodeID,
+          "updateActuatorInformation %d %d %b", nodeId,
           actuator.getId(),
           actuator.isOn());
       this.handler.sendEncryptedMessage(response);
@@ -182,7 +189,7 @@ public class GreenhouseSimulator {
   }
 
   /**
-   * Initialize sensor listeners
+   * Initialize sensor listeners.
    *
    * @param node The node to initialize listeners for
    */
@@ -233,10 +240,21 @@ public class GreenhouseSimulator {
     }
   }
 
+  /**
+   * Get a node by its ID.
+   *
+   * @param id The ID of the node to get
+   * @return The node with the given ID
+   */
   public SensorActuatorNode getNode(int id) {
     return nodes.get(id);
   }
 
+  /**
+   * Get all the nodes in the greenhouse.
+   *
+   * @return A list of all the nodes in the greenhouse
+   */
   public List<SensorActuatorNode> getNodes() {
     return nodes.values().stream().toList();
   }
