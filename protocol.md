@@ -140,7 +140,6 @@ Commands supported by Server
 - I am Controlpanel -> Special command used in handshake
 - I am Greenhouse -> Special command used in handshake
 
-
 ### Error messages
 
 In our system nodes do not send error messages over the network. If a node encounters an error, 
