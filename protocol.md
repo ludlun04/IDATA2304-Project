@@ -120,13 +120,11 @@ A common value type we use across many of our messages is the nodeId. This infor
 Every message contains a commandword at the start, this tells the receiver what it should do and if it should send data as a response. 
 If an action requires information in addition to the commandword, the commandword will be followed by the information.
 
-
-
 ### Commands supported by control-panel
-- add NodeId ActuatorId ActuatorType ActuatorState ... (ActuatorInformation is repeated as many times as 
-- there are actuators on the node)
+- add NodeId ActuatorId ActuatorType ActuatorState ... (ActuatorInformation is repeated as many times as
+- add NodeId ActuatorId ActuatorType ActuatorState ... (actuatorId, type and state is repeated as many times as there are actuators on the node)
 - remove NodeId
-- updateSensorsInformation NodeId <reading...>
+- updateSensorsInformation NodeId SensorType ReadingValue ReadingUint ... (type value and unit repeted as many times as there are sensors on the node with id NodeId)
 - updateActuatorInformation NodeId ActuatorId ActuatorState
 
 ### Commands supported by greenhouse node
